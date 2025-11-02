@@ -1,0 +1,188 @@
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { API_ENDPOINTS, createApiOptions } from "../utils/validation";
+import "./registration.css";
+
+/* registration.jsx */
+
+const initialState = {
+    firstName: "",
+    lastName: "",
+    phoneNumber: "",
+    email: "",
+    password: "",
+    role: "client",
+};
+
+export default function Registration() {
+    const [form, setForm] = useState(initialState);
+    const [errors, setErrors] = useState({});
+    const [submitting, setSubmitting] = useState(false);
+    const [message, setMessage] = useState(null);
+    const navigate = useNavigate();
+
+    const validate = (values) => {
+        const errs = {};
+        if (!values.firstName.trim()) errs.firstName = "First name is required";
+        if (!values.email.trim()) {
+            errs.email = "Email is required";
+        } else {
+            // basic email pattern
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!re.test(values.email)) errs.email = "Invalid email address";
+        }
+        if (!values.password) {
+            errs.password = "Password is required";
+        } else if (values.password.length < 6) {
+            errs.password = "Password must be at least 6 characters";
+        }
+        if (!values.role || !["client", "provider"].includes(values.role)) {
+            errs.role = "Role must be client or provider";
+        }
+        return errs;
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setForm((s) => ({ ...s, [name]: value }));
+        setErrors((es) => ({ ...es, [name]: undefined }));
+        setMessage(null);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const validation = validate(form);
+        setErrors(validation);
+        if (Object.keys(validation).length) return;
+
+        setSubmitting(true);
+        setMessage(null);
+
+        try {
+            const res = await fetch(API_ENDPOINTS.REGISTER, createApiOptions("POST", form));
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                throw new Error(data.message || "Registration failed");
+            }
+
+            // Redirect to home page with user data (flexible payload)
+            const userPayload = (data && (data.user || data)) || form;
+            navigate("/home", {
+                state: { user: userPayload },
+                replace: true,
+            });
+        } catch (err) {
+            setMessage({ type: "error", text: err.message || "Something went wrong" });
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    return (
+        <div className="reg-container">
+            <form className="reg-form" onSubmit={handleSubmit} noValidate>
+                <h2 className="reg-title">Create account</h2>
+
+                <div className="reg-row">
+                    <label className="reg-label">
+                        First name
+                        <input
+                            name="firstName"
+                            value={form.firstName}
+                            onChange={handleChange}
+                            className={`reg-input ${errors.firstName ? "invalid" : ""}`}
+                            required
+                        />
+                        {errors.firstName && <div className="reg-error">{errors.firstName}</div>}
+                    </label>
+
+                    <label className="reg-label">
+                        Last name
+                        <input
+                            name="lastName"
+                            value={form.lastName}
+                            onChange={handleChange}
+                            className="reg-input"
+                        />
+                    </label>
+                </div>
+
+                <label className="reg-label">
+                    Phone number
+                    <input
+                        name="phoneNumber"
+                        value={form.phoneNumber}
+                        onChange={handleChange}
+                        className="reg-input"
+                        placeholder="+1 555 555 5555"
+                    />
+                </label>
+
+                <label className="reg-label">
+                    Email
+                    <input
+                        name="email"
+                        type="email"
+                        value={form.email}
+                        onChange={handleChange}
+                        className={`reg-input ${errors.email ? "invalid" : ""}`}
+                        required
+                    />
+                    {errors.email && <div className="reg-error">{errors.email}</div>}
+                </label>
+
+                <label className="reg-label">
+                    Password
+                    <input
+                        name="password"
+                        type="password"
+                        value={form.password}
+                        onChange={handleChange}
+                        className={`reg-input ${errors.password ? "invalid" : ""}`}
+                        required
+                    />
+                    {errors.password && <div className="reg-error">{errors.password}</div>}
+                </label>
+
+                <fieldset className="reg-fieldset">
+                    <legend className="reg-legend">Role</legend>
+                    <label className="reg-radio">
+                        <input
+                            type="radio"
+                            name="role"
+                            value="client"
+                            checked={form.role === "client"}
+                            onChange={handleChange}
+                        />
+                        Client
+                    </label>
+                    <label className="reg-radio">
+                        <input
+                            type="radio"
+                            name="role"
+                            value="provider"
+                            checked={form.role === "provider"}
+                            onChange={handleChange}
+                        />
+                        Provider
+                    </label>
+                    {errors.role && <div className="reg-error">{errors.role}</div>}
+                </fieldset>
+
+                <button className="reg-button" type="submit" disabled={submitting}>
+                    {submitting ? "Submitting..." : "Register"}
+                </button>
+                <div className="reg-footer">
+                    <Link to="/" className="reg-login-link">Already have an account? Log in</Link>
+                </div>
+
+                {message && (
+                    <div className={`reg-message ${message.type === "error" ? "error" : "success"}`}>
+                        {message.text}
+                    </div>
+                )}
+            </form>
+        </div>
+    );
+}

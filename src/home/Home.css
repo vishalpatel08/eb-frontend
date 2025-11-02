@@ -1,0 +1,16 @@
+.home-layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.home-content {
+    flex: 1;
+    background: var(--page-bg);
+}
+
+@media (max-width: 640px) {
+    .home-content {
+        padding-bottom: 24px;
+    }
+}

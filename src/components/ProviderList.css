@@ -1,0 +1,89 @@
+.provider-list {
+    padding: 24px;
+}
+
+.provider-list h2 {
+    margin-bottom: 24px;
+    font-size: 24px;
+}
+
+.provider-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.provider-card {
+    background: var(--bg);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.provider-card.clickable {
+    cursor: pointer;
+    transition: box-shadow 0.15s, transform 0.12s;
+}
+.provider-card.clickable:hover {
+    box-shadow: 0 8px 32px rgba(99,102,241,0.12);
+    transform: translateY(-2px) scale(1.02);
+}
+
+.provider-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--fw-semibold);
+    font-size: 24px;
+    margin-bottom: 16px;
+}
+
+.provider-info h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+}
+
+.provider-specialty {
+    color: var(--muted);
+    margin: 0 0 12px;
+}
+
+.provider-rating {
+    color: #f59e0b;
+    font-weight: var(--fw-semibold);
+    margin-bottom: 16px;
+}
+
+.book-button {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    padding: 8px 24px;
+    font-weight: var(--fw-semibold);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.book-button:hover {
+    background: #4f46e5;
+}
+
+@media (max-width: 640px) {
+    .provider-list {
+        padding: 16px;
+    }
+    
+    .provider-grid {
+        grid-template-columns: 1fr;
+    }
+}

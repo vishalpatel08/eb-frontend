@@ -1,0 +1,123 @@
+/* Profile card uses global tokens and base styles from src/styles/main.css */
+.profile-card{
+    max-width: 440px;
+    width: 100%;
+    background: var(--bg);
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+    padding: 20px;
+    box-sizing: border-box;
+    color: var(--text);
+}
+
+/* Header with avatar and title */
+.profile-header{
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+/* Circular avatar with initials */
+.avatar{
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 20px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent), #8b5cf6 70%);
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
+}
+
+/* Title area */
+.title{
+    display: flex;
+    flex-direction: column;
+}
+
+.name{
+    margin: 0;
+    font-size: 18px;
+    line-height: 1;
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* Badge indicating role */
+.role-badge{
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 12px;
+    padding: 6px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+/* Role color variants */
+.role-badge.client{
+    background: var(--client-bg);
+    color: var(--client-color);
+}
+
+.role-badge.provider{
+    background: var(--provider-bg);
+    color: var(--provider-color);
+}
+
+/* Body with rows */
+.profile-body{
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Each row: label on left, value on right */
+.row{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 8px;
+    transition: background 0.12s ease;
+}
+
+.row:hover{
+    background: rgba(15, 23, 42, 0.02);
+}
+
+/* Label (muted) and value (strong) */
+.label{
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.value{
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    text-align: right;
+}
+
+/* Responsive adjustments */
+@media (max-width: 420px){
+    .profile-card{
+        padding: 16px;
+    }
+
+    .avatar{
+        width: 56px;
+        height: 56px;
+        min-width: 56px;
+        font-size: 18px;
+    }
+
+    .name{
+        font-size: 16px;
+    }
+}

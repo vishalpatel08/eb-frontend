@@ -1,0 +1,68 @@
+/* Page-specific styles only (layout and custom elements) */
+.login-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+    background: var(--page-bg);
+}
+
+.login-form {
+    width: 100%;
+    max-width: 420px;
+    background: var(--bg);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--card-shadow);
+}
+
+.login-title {
+    margin: 0 0 24px;
+    font-size: 20px;
+    text-align: center;
+}
+
+.password-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.password-row .form-field {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.password-row .input {
+    margin-bottom: 0;
+}
+
+.password-row .toggle-btn {
+    margin-top: 34px; /* Aligns with input field (accounts for label height + label margin) */
+}
+
+.error {
+    margin: 12px 0;
+    color: #b91c1c;
+    background: #fff1f2;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.reg-footer {
+    margin-top: 16px;
+    text-align: center;
+}
+
+@media (max-width: 480px) {
+    .login-page {
+        padding: 16px;
+    }
+    
+    .login-form {
+        padding: 20px;
+    }
+}

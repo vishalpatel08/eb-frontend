@@ -1,0 +1,119 @@
+/* Provider Details - clean, themed stylesheet */
+
+.provider-page {
+    min-height: 100vh;
+    background-color: var(--background);
+    color: var(--text-primary);
+}
+
+.provider-header {
+    background: linear-gradient(to right, var(--primary-600), var(--primary-700));
+    color: var(--header-text);
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.provider-header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.provider-avatar-large {
+    width: 100px;
+    height: 100px;
+    background: var(--surface);
+    color: var(--primary-700);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 600;
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border);
+}
+
+.provider-header-info h1 {
+    margin: 0;
+    font-size: 1.75rem;
+}
+
+.provider-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.4rem;
+}
+
+.provider-specialty { font-size: 0.95rem; color: var(--text-secondary); }
+.provider-rating { background-color: rgba(255,255,255,0.12); padding: 0.25rem 0.6rem; border-radius: 12px; color: var(--header-text); }
+
+.status-badge { padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.85rem; }
+.status-badge.available { background-color: var(--success-50); color: var(--success-700); }
+.status-badge.busy { background-color: var(--error-50); color: var(--error-700); }
+.status-badge.away { background-color: var(--warning-50); color: var(--warning-700); }
+
+.provider-details-layout { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; display: grid; grid-template-columns: 1fr 340px; gap: 1.5rem; }
+
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.section-header h2 { font-size: 1.25rem; margin: 0; }
+
+.services-section { min-width: 0; }
+.services-list { display: grid; gap: 1rem; }
+
+.service-card {
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border: 1px solid var(--border);
+    box-shadow: var(--card-shadow);
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+.service-card:hover { transform: translateY(-4px); box-shadow: var(--card-shadow-hover); border-color: var(--border-hover); }
+.service-content { flex: 1; min-width: 0; }
+.service-card h3 { margin: 0 0 0.5rem 0; font-size: 1.05rem; }
+.service-description { margin: 0 0 0.5rem 0; color: var(--text-secondary); font-size: 0.95rem; }
+.service-meta { display: flex; gap: 0.75rem; color: var(--text-tertiary); font-size: 0.85rem; }
+
+.service-actions { display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end; }
+.service-price { font-size: 1.15rem; font-weight: 600; color: var(--text-primary); }
+.currency { font-size: 0.85rem; margin-right: 0.125rem; }
+
+.book-service-btn { background: var(--accent-500); color: white; padding: 0.45rem 0.9rem; border-radius: 8px; border: none; cursor: pointer; }
+.book-service-btn:hover { background: var(--accent-600); transform: translateY(-2px); }
+
+.provider-info-section { align-self: start; }
+.provider-info-card { background: var(--surface); border-radius: 8px; border: 1px solid var(--border); box-shadow: var(--card-shadow); overflow: hidden; }
+.info-section { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); }
+.info-section h3 { margin: 0 0 0.5rem 0; font-size: 1rem; }
+.info-list { display: grid; gap: 0.5rem; }
+.info-item { display: flex; justify-content: space-between; gap: 0.5rem; }
+.info-label { color: var(--text-secondary); }
+.info-value { color: var(--text-primary); }
+
+.working-hours { font-size: 0.95rem; color: var(--text-secondary); }
+.loading-overlay { text-align: center; padding: 1rem; color: var(--text-tertiary); }
+.error-message { background: var(--error-50); color: var(--error-700); padding: 0.75rem 1rem; border-radius: 8px; }
+.empty-state { text-align: center; padding: 1.25rem; color: var(--text-secondary); }
+
+@media (max-width: 960px) {
+    .provider-details-layout { grid-template-columns: 1fr; }
+    .provider-header-content { flex-direction: column; text-align: center; gap: 0.75rem; }
+    .provider-avatar-large { width: 88px; height: 88px; }
+}
+
+@media (max-width: 480px) {
+    .provider-avatar-large { width: 72px; height: 72px; font-size: 1.5rem; }
+    .service-card { padding: 0.75rem; flex-direction: column; align-items: stretch; }
+    .service-actions { flex-direction: row; justify-content: space-between; align-items: center; }
+}
+
