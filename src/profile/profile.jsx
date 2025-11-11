@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import './profile.css';
 
 const ROLE_LABELS = {
@@ -17,12 +17,16 @@ const defaultUser = {
 
 export default function Profile() {
     const location = useLocation();
-    // Expect payload from login: { message, token, user: { firstName, lastName, email, phoneNumber, role } }
+    const navigate = useNavigate();
     const received = location && location.state;
-    console.log('Profile received state:', received);
-    const user = (received && received.user) || received || defaultUser;
+    const storedUser = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || 'null') : null;
+    const user = (received && received.user) || received || storedUser || defaultUser;
     const { firstName, lastName, email, phoneNumber, role } = user || defaultUser;
     const initials = `${(firstName || '').charAt(0)}${(lastName || '').charAt(0)}`.toUpperCase();
+
+    const goToBookings = () => {
+        navigate('/bookings', { state: { user } });
+    };
 
     return (
         <div className="profile-card">
@@ -47,6 +51,17 @@ export default function Profile() {
                     <div className="label">Role</div>
                     <div className="value">{ROLE_LABELS[role] || role}</div>
                 </div>
+            </div>
+
+            <div className="profile-actions" style={{gap: 8, flexWrap: 'wrap'}}>
+                <button className="btn-primary" onClick={goToBookings}>My Bookings</button>
+                {role === 'provider' && (
+                  <>
+                    <button className="btn-secondary" onClick={() => navigate('/provider/bookings', { state: { user } })}>Clients' Bookings</button>
+                    <button className="btn-secondary" onClick={() => navigate('/provider/service/new', { state: { user } })}>Create Service</button>
+                    <button className="btn-secondary" onClick={() => navigate('/provider/schedule', { state: { user } })}>Edit Schedule</button>
+                  </>
+                )}
             </div>
         </div>
     );

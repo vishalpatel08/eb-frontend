@@ -1,13 +1,14 @@
 /* Profile card uses global tokens and base styles from src/styles/main.css */
 .profile-card{
-    max-width: 440px;
+    max-width: 520px;
     width: 100%;
     background: var(--bg);
     border-radius: var(--radius);
     box-shadow: var(--card-shadow);
-    padding: 20px;
+    padding: 24px;
     box-sizing: border-box;
     color: var(--text);
+    margin: 24px auto;
 }
 
 /* Header with avatar and title */
@@ -76,6 +77,41 @@
     flex-direction: column;
     gap: 10px;
 }
+
+/* Action button area */
+.profile-actions{
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Primary button */
+.btn-primary{
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.12s ease, opacity 0.12s ease;
+}
+.btn-primary:hover{ opacity: 0.95; }
+.btn-primary:active{ transform: translateY(1px); }
+
+/* Secondary button */
+.btn-secondary{
+    background: #eef2ff;
+    color: #3730a3;
+    border: 1px solid #c7d2fe;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.12s ease, opacity 0.12s ease, border-color 0.12s ease;
+}
+.btn-secondary:hover{ opacity: 0.95; border-color: #a5b4fc; }
+.btn-secondary:active{ transform: translateY(1px); }
 
 /* Each row: label on left, value on right */
 .row{

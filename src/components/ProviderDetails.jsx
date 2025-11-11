@@ -16,6 +16,7 @@ export default function ProviderDetails() {
     const [services, setServices] = useState([]);
     const [schedule, setSchedule] = useState(null);
     const [bookedServiceIds, setBookedServiceIds] = useState(new Set());
+    const [serviceStatusMap, setServiceStatusMap] = useState(new Map());
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [scheduleError, setScheduleError] = useState(null);
@@ -50,8 +51,22 @@ export default function ProviderDetails() {
                 if (!res.ok) return;
                 const data = await res.json().catch(() => ({}));
                 const bookings = Array.isArray(data?.bookings) ? data.bookings : [];
-                const ids = new Set(bookings.map(b => String(b.serviceId || b.serviceID || b.service_id || '')));
-                if (mounted) setBookedServiceIds(ids);
+                const ids = new Set();
+                const statusMap = new Map();
+                // Pick latest by startTime per service for current status view
+                bookings.forEach(b => {
+                    const sid = String(b.serviceId || b.serviceID || b.service_id || '');
+                    if (!sid) return;
+                    ids.add(sid);
+                    const prev = statusMap.get(sid);
+                    if (!prev || new Date(b.startTime) > new Date(prev.startTime)) {
+                        statusMap.set(sid, { status: String(b.status || ''), startTime: b.startTime });
+                    }
+                });
+                if (mounted) {
+                    setBookedServiceIds(ids);
+                    setServiceStatusMap(statusMap);
+                }
             } catch (_) { /* ignore */ }
         };
 
@@ -170,6 +185,7 @@ export default function ProviderDetails() {
                         {services.map(service => {
                             const sid = String(service.id || service._id);
                             const isBooked = bookedServiceIds.has(sid) || (bookedServiceId && String(bookedServiceId) === sid);
+                            const status = (serviceStatusMap.get(sid)?.status || '').toLowerCase();
                             return (
                                 <div key={sid} className="service-card">
                                     <div className="service-content">
@@ -190,18 +206,27 @@ export default function ProviderDetails() {
                                             <span className="amount">{formatPrice(service.price)}</span>
                                         </div>
                                         {isBooked ? (
-                                            <button className="book-service-btn" disabled>
-                                                Booked
-                                            </button>
+                                            status === 'cancelled' ? (
+                                                <Link 
+                                                    to="/booking"
+                                                    className="book-service-btn"
+                                                    state={{ service, provider, user }}
+                                                >
+                                                    Rebook
+                                                </Link>
+                                            ) : (
+                                                <button className="book-service-btn" disabled style={{
+                                                    backgroundColor: status==='accepted' ? '#16a34a' : '#f59e0b',
+                                                    color: '#fff'
+                                                }}>
+                                                    {status === 'accepted' ? 'Confirmed' : 'Waiting for approval'}
+                                                </button>
+                                            )
                                         ) : (
                                             <Link 
                                                 to="/booking"
                                                 className="book-service-btn"
-                                                state={{ 
-                                                    service: service, 
-                                                    provider: provider, 
-                                                    user: user 
-                                                }}
+                                                state={{ service, provider, user }}
                                             >
                                                 Book Now
                                             </Link>

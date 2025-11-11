@@ -101,6 +101,45 @@
 .info-value { color: var(--text-primary); }
 
 .working-hours { font-size: 0.95rem; color: var(--text-secondary); }
+
+/* Working hours list */
+.hours-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Each day row */
+.hours-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+}
+.hours-item:hover {
+    transform: translateY(-1px);
+    border-color: var(--border-hover);
+    box-shadow: var(--card-shadow-hover);
+}
+/* Day label (first span) */
+.hours-item > span:first-child {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+/* Time value (last span) */
+.hours-item > span:last-child {
+    color: var(--text-primary);
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: rgba(99, 102, 241, 0.08); /* subtle primary tint */
+}
+
 .loading-overlay { text-align: center; padding: 1rem; color: var(--text-tertiary); }
 .error-message { background: var(--error-50); color: var(--error-700); padding: 0.75rem 1rem; border-radius: 8px; }
 .empty-state { text-align: center; padding: 1.25rem; color: var(--text-secondary); }

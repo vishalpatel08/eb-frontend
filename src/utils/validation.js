@@ -9,8 +9,14 @@ export const API_ENDPOINTS = {
     LOGIN: 'http://localhost:4000/login',
     REGISTER: 'http://localhost:4000/registration',
     BOOKING: 'http://localhost:4000/booking',
-    BOOKINGS_ME: 'http://localhost:4000/bookings/me'
+    BOOKINGS_ME: 'http://localhost:4000/bookings/me',
+    PROVIDER_BOOKINGS_ME: 'http://localhost:4000/providers/me/bookings',
+    SERVICE_CREATE: 'http://localhost:4000/service',
+    UPDATE_SCHEDULE: 'http://localhost:4000/updateschedule',
+    BOOKING_STATUS_BASE: 'http://localhost:4000/bookings'
 };
+
+export const bookingStatusUrl = (bookingId) => `${API_ENDPOINTS.BOOKING_STATUS_BASE}/${bookingId}/status`;
 
 // Provider list endpoint
 API_ENDPOINTS.PROVIDERS = 'http://localhost:4000/providers';
@@ -35,20 +41,34 @@ export const createGetOptions = (token) => ({
     headers: token ? { Authorization: `Bearer ${token}` } : {}
 });
 
+export const createPutOptions = (bodyData, token = null) => {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    return { method: 'PUT', headers, body: JSON.stringify(bodyData) };
+};
+
 export const createPostOptions = (bodyData, token = null) => {
     const headers = {
         'Content-Type': 'application/json',
     };
-
-    // Add the Authorization header if a token is provided
-    // Your Go code uses r.Header.Get("Authorization"), so this is what it's looking for.
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-
+    if (token) headers['Authorization'] = `Bearer ${token}`;
     return {
         method: 'POST',
-        headers: headers,
-        body: JSON.stringify(bodyData), // Convert the JS object to a JSON string
+        headers,
+        body: JSON.stringify(bodyData),
     };
 };
+
+export const createPutOptionsForStatusUpdate = (bodyData, token = null) => {
+    const headers = {
+        'Content-Type': 'application/json',
+    };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    return {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(bodyData),
+    };
+};
+
+export const buildBookingStatusUrl = (bookingId) => `${API_ENDPOINTS.BOOKING_STATUS_BASE}/${bookingId}/status`;
