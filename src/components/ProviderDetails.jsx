@@ -9,11 +9,16 @@ export default function ProviderDetails() {
     const location = useLocation();
     // Try to get provider from navigation state, else fetch by id
     const initialProvider = location.state?.provider || null;
-    const user = location.state?.user || null;
+    const stateUser = location.state?.user || null;
+    const user = stateUser || (typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || 'null') : null);
+    const bookedServiceId = location.state?.bookedServiceId || null;
     const [provider, setProvider] = useState(initialProvider);
     const [services, setServices] = useState([]);
+    const [schedule, setSchedule] = useState(null);
+    const [bookedServiceIds, setBookedServiceIds] = useState(new Set());
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [scheduleError, setScheduleError] = useState(null);
 
     // Helpers to format service fields
     const formatDuration = (duration) => {
@@ -33,33 +38,97 @@ export default function ProviderDetails() {
     };
 
     useEffect(() => {
-        if (provider && provider.services) {
-            setServices(provider.services);
-            return;
-        }
         let mounted = true;
-        const fetchProvider = async () => {
+
+        const token = user?.token || user?.accessToken || null;
+
+        // Fetch current user's bookings and build a Set of serviceIds
+        const fetchMyBookings = async () => {
+            if (!token) return;
+            try {
+                const res = await fetch(API_ENDPOINTS.BOOKINGS_ME, createGetOptions(token));
+                if (!res.ok) return;
+                const data = await res.json().catch(() => ({}));
+                const bookings = Array.isArray(data?.bookings) ? data.bookings : [];
+                const ids = new Set(bookings.map(b => String(b.serviceId || b.serviceID || b.service_id || '')));
+                if (mounted) setBookedServiceIds(ids);
+            } catch (_) { /* ignore */ }
+        };
+
+        // If provider is absent (e.g., after refresh), fetch providers list and find the matching one.
+        const ensureProviderHeader = async () => {
+            if (provider) return;
+            try {
+                const res = await fetch(`${API_ENDPOINTS.PROVIDERS}`, createGetOptions(token));
+                if (!res.ok) return; // silently ignore; header will remain minimal
+                const data = await res.json().catch(() => ({}));
+                const list = Array.isArray(data?.providers) ? data.providers : [];
+                const match = list.find(p => String(p.id || p._id) === String(id) || String(p.userId) === String(id));
+                if (mounted && match) setProvider(match);
+            } catch (_) { /* ignore header fetch errors */ }
+        };
+
+        // Fetch services list from API
+        const primeProvider = async () => {
+            console.log(" 1 ")
+            if (provider && Array.isArray(provider.services) && provider.services.length > 0) {
+                setServices(provider.services);
+                return;
+            }
+            console.log(" 2 ")
             setLoading(true);
             setError(null);
+            console.log(" 3 ")
             try {
-                const token = user?.token || user?.accessToken || null;
-                const res = await fetch(`${API_ENDPOINTS.PROVIDERS}/${id}`, createGetOptions(token));
+                console.log(" 4 ")
+                const providerKey = provider?.userId || id; // backend expects provider's userId
+                const res = await fetch(`${API_ENDPOINTS.PROVIDERS}/${providerKey}/services`, createGetOptions(token));
+                console.log(" 5 ")
                 if (!res.ok) {
+                    console.log(" 6 ")
+                    if (res.status === 404) {
+                        if (mounted) setServices([]);
+                        return;
+                    }
                     const errBody = await res.json().catch(() => ({}));
-                    throw new Error(errBody.message || `Failed to load provider (${res.status})`);
+                    throw new Error(errBody.message || `Failed to load services (${res.status})`);
                 }
                 const data = await res.json().catch(() => ({}));
-                if (mounted) {
-                    setProvider(data);
-                    setServices(data.services || []);
-                }
+                const list = Array.isArray(data?.services) ? data.services : [];
+                if (mounted) setServices(list);
             } catch (err) {
-                if (mounted) setError(err.message || 'Failed to load provider');
+                if (mounted) setError(err.message || 'Failed to load services');
             } finally {
                 if (mounted) setLoading(false);
             }
         };
-        fetchProvider();
+
+        const fetchSchedule = async () => {
+            setScheduleError(null);
+            try {
+                const providerKey = provider?.userId || id; // Availability uses provider's userId
+                const res = await fetch(`${API_ENDPOINTS.PROVIDERS}/${providerKey}/schedule`, createGetOptions(token));
+                if (!res.ok) {
+                    if (res.status === 404) {
+                        // No schedule yet: treat as all closed without raising error
+                        if (mounted) setSchedule({ week: {} });
+                        return;
+                    }
+                    const errBody = await res.json().catch(() => ({}));
+                    throw new Error(errBody.message || `Failed to load schedule (${res.status})`);
+                }
+                const data = await res.json().catch(() => ({}));
+                if (mounted) setSchedule(data);
+            } catch (err) {
+                if (mounted) setScheduleError(err.message || 'Failed to load schedule');
+            }
+        };
+
+        ensureProviderHeader();
+        primeProvider();
+        fetchSchedule();
+        fetchMyBookings();
+
         return () => { mounted = false; };
     }, [id, user, provider]);
 
@@ -74,6 +143,7 @@ export default function ProviderDetails() {
                     <div className="provider-header-info">
                         <h1>{provider?.firstName} {provider?.lastName}</h1>
                         <div className="provider-meta">
+                            <span className="provider-specialty">{provider?.specialty || provider?.domain}</span>
                             <span className="provider-specialty">{provider?.specialty || provider?.title}</span>
                             <span className="provider-rating">★ {provider?.rating ?? '—'}</span>
                             <span className={`status-badge ${provider?.status || 'available'}`}>
@@ -97,45 +167,49 @@ export default function ProviderDetails() {
                     {error && <div className="error-message">{error}</div>}
 
                     <div className="services-list">
-                        {services.map(service => (
-                            <div key={service.id || service._id} className="service-card">
-                                <div className="service-content">
-                                    <h3>{service.title ?? service.name}</h3>
-                                    {service.description && (
-                                        <p className="service-description">{service.description}</p>
-                                    )}
-                                    <div className="service-meta">
-                                        <span className="service-duration">⏱ {formatDuration(service.duration)}</span>
-                                        {service.category && (
-                                            <span className="service-category">{service.category}</span>
+                        {services.map(service => {
+                            const sid = String(service.id || service._id);
+                            const isBooked = bookedServiceIds.has(sid) || (bookedServiceId && String(bookedServiceId) === sid);
+                            return (
+                                <div key={sid} className="service-card">
+                                    <div className="service-content">
+                                        <h3>{service.title ?? service.name}</h3>
+                                        {service.description && (
+                                            <p className="service-description">{service.description}</p>
+                                        )}
+                                        <div className="service-meta">
+                                            <span className="service-duration">⏱ {formatDuration(service.duration)}</span>
+                                            {service.category && (
+                                                <span className="service-category">{service.category}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="service-actions">
+                                        <div className="service-price">
+                                            <span className="currency">$</span>
+                                            <span className="amount">{formatPrice(service.price)}</span>
+                                        </div>
+                                        {isBooked ? (
+                                            <button className="book-service-btn" disabled>
+                                                Booked
+                                            </button>
+                                        ) : (
+                                            <Link 
+                                                to="/booking"
+                                                className="book-service-btn"
+                                                state={{ 
+                                                    service: service, 
+                                                    provider: provider, 
+                                                    user: user 
+                                                }}
+                                            >
+                                                Book Now
+                                            </Link>
                                         )}
                                     </div>
                                 </div>
-                                <div className="service-actions">
-                                    <div className="service-price">
-                                        <span className="currency">$</span>
-                                        <span className="amount">{formatPrice(service.price)}</span>
-                                    </div>
-                                    
-                                    {/* --- MODIFICATION HERE --- */}
-                                    {/* Changed from <button> to <Link> */}
-                                    <Link 
-                                        to="/booking"
-                                        className="book-service-btn"
-                                        // Pass all necessary data to the booking page
-                                        state={{ 
-                                            service: service, 
-                                            provider: provider, 
-                                            user: user 
-                                        }}
-                                    >
-                                        Book Now
-                                    </Link>
-                                    {/* --- END MODIFICATION --- */}
-
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                         {!loading && !error && services.length === 0 && (
                             <div className="empty-state">
                                 <p>No services available at the moment.</p>
@@ -180,23 +254,30 @@ export default function ProviderDetails() {
                             <div className="info-section">
                                 <h3>Working Hours</h3>
                                 <div className="working-hours">
-                                    {provider.workingHours ? (
-                                        <pre>{provider.workingHours}</pre>
-                                    ) : (
+                                    {scheduleError && <div className="error-message">{scheduleError}</div>}
+                                    {schedule ? (
                                         <div className="hours-list">
-                                            <div className="hours-item">
-                                                <span>Mon - Fri</span>
-                                                <span>9:00 AM - 6:00 PM</span>
-                                            </div>
-                                            <div className="hours-item">
-                                                <span>Saturday</span>
-                                                <span>10:00 AM - 4:00 PM</span>
-                                            </div>
-                                            <div className="hours-item">
-                                                <span>Sunday</span>
-                                                <span>Closed</span>
-                                            </div>
+                                            {['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].map(day => {
+                                                const slot = schedule.week?.[day];
+                                                const label = day.charAt(0).toUpperCase() + day.slice(1);
+                                                if (!slot || !slot.isAvailable) {
+                                                    return (
+                                                        <div key={day} className="hours-item">
+                                                            <span>{label}</span>
+                                                            <span>Closed</span>
+                                                        </div>
+                                                    );
+                                                }
+                                                return (
+                                                    <div key={day} className="hours-item">
+                                                        <span>{label}</span>
+                                                        <span>{slot.startTime} - {slot.endTime}</span>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
+                                    ) : (
+                                        <div className="muted">Loading schedule...</div>
                                     )}
                                 </div>
                             </div>

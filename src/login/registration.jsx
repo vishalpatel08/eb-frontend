@@ -66,8 +66,19 @@ export default function Registration() {
                 throw new Error(data.message || "Registration failed");
             }
 
-            // Redirect to home page with user data (flexible payload)
-            const userPayload = (data && (data.user || data)) || form;
+            // Build user object with token so authenticated requests work
+            const token = data?.token;
+            const userPayload = {
+                firstName: form.firstName,
+                lastName: form.lastName,
+                email: form.email,
+                phoneNumber: form.phoneNumber,
+                role: form.role,
+                token,
+            };
+            if (token) {
+                try { localStorage.setItem('user', JSON.stringify(userPayload)); } catch (_) {}
+            }
             navigate("/home", {
                 state: { user: userPayload },
                 replace: true,

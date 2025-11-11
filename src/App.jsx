@@ -4,11 +4,14 @@ import Registration from './login/registration'
 import Profile from './profile/profile'
 import Home from './home/Home'
 import ProviderDetails from './components/ProviderDetails'
+import BookingPage from './components/BookingPage'
 
 // Protected Route wrapper
 function RequireAuth({ children }) {
   const location = useLocation();
-  const user = location.state?.user;
+  const stateUser = location.state?.user;
+  const storedUser = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || 'null') : null;
+  const user = stateUser || storedUser;
   if (!user) {
     return <Navigate to="/" replace />;
   }
@@ -39,8 +42,11 @@ function App() {
             <ProviderDetails />
           </RequireAuth>
         } />
-        {/* <Route path="/booking" element={<BookingPage />} /> */}
-        {/* Fallback: redirect unknown routes to home if logged in, otherwise to login */}
+         <Route path="/booking" element={
+          <RequireAuth>
+            <BookingPage />
+          </RequireAuth>
+        } />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

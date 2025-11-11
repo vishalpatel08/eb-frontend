@@ -43,7 +43,8 @@ export default function Login({ onSuccess }) {
             // Be flexible with payload shape: some APIs return the user directly,
             // others wrap it as { user }
             const userPayload = (data && (data.user || data)) || { email };
-            navigate("/home", { state: { user: userPayload }, replace: true });
+            const userWithToken = { ...userPayload, token: data?.token || userPayload?.token };
+            navigate("/home", { state: { user: userWithToken }, replace: true });
         } catch (err) {
             setError(err.message || "Login failed. Please try again.");
         } finally {

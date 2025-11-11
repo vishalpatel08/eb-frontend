@@ -88,8 +88,8 @@
 .service-price { font-size: 1.15rem; font-weight: 600; color: var(--text-primary); }
 .currency { font-size: 0.85rem; margin-right: 0.125rem; }
 
-.book-service-btn { background: var(--accent-500); color: white; padding: 0.45rem 0.9rem; border-radius: 8px; border: none; cursor: pointer; }
-.book-service-btn:hover { background: var(--accent-600); transform: translateY(-2px); }
+.book-service-btn { background: var(--accent); color: #ffffff; padding: 0.45rem 0.9rem; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+.book-service-btn:hover { background: var(--accent-600); }
 
 .provider-info-section { align-self: start; }
 .provider-info-card { background: var(--surface); border-radius: 8px; border: 1px solid var(--border); box-shadow: var(--card-shadow); overflow: hidden; }

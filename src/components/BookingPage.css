@@ -1,0 +1,143 @@
+/* --- Main Page Layout --- */
+.booking-page {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+        Arial, sans-serif;
+}
+
+.booking-page h2 {
+    text-align: center;
+    color: #222;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+/* --- Booking Summary Box --- */
+.booking-summary {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.booking-summary h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 600;
+}
+
+.booking-summary p {
+    margin: 0.25rem 0;
+    color: #555;
+    font-size: 0.95rem;
+}
+
+.booking-summary p:last-child {
+    margin-bottom: 0;
+}
+
+/* --- Booking Form --- */
+.booking-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 500;
+    color: #444;
+    margin-bottom: 0.5rem;
+}
+
+.form-group input[type='datetime-local'] {
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    background-color: #fff;
+    font-family: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input[type='datetime-local']:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+/* --- Action Buttons --- */
+.booking-footer {
+    display: flex;
+    gap: 12px;
+    margin-top: 1rem;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.booking-page .btn {
+    appearance: none;
+    font: inherit;
+    line-height: 1;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.05s ease;
+}
+
+.booking-page .btn:active {
+    transform: translateY(0);
+}
+
+.booking-page .btn-primary {
+    background-color: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+}
+
+.booking-page .btn-primary:hover {
+    background-color: #1d4ed8;
+    border-color: #1d4ed8;
+}
+
+.booking-page .btn-primary:disabled {
+    background-color: #93c5fd;
+    border-color: #93c5fd;
+    opacity: 0.85;
+    cursor: not-allowed;
+}
+
+.booking-page .btn-ghost {
+    background-color: transparent;
+    color: #374151;
+    border-color: #d1d5db;
+}
+
+.booking-page .btn-ghost:hover {
+    background-color: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+/* --- Utility Classes --- */
+.error-message {
+    color: #d93025;
+    background-color: #fdeded;
+    border: 1px solid #f5c6cb;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+}
