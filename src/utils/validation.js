@@ -4,22 +4,28 @@ export const emailIsValid = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.t
 // Validate password length
 export const passwordIsValid = (password, minLength = 6) => password.length >= minLength;
 
-// API endpoints
+// API base and endpoints
+export const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL)
+    || (typeof window !== 'undefined' && window.__API_BASE__)
+    || 'http://localhost:4000';
+
+const join = (base, path) => `${String(base).replace(/\/+$/,'')}/${String(path).replace(/^\/+/, '')}`;
+
 export const API_ENDPOINTS = {
-    LOGIN: 'http://localhost:4000/login',
-    REGISTER: 'http://localhost:4000/registration',
-    BOOKING: 'http://localhost:4000/booking',
-    BOOKINGS_ME: 'http://localhost:4000/bookings/me',
-    PROVIDER_BOOKINGS_ME: 'http://localhost:4000/providers/me/bookings',
-    SERVICE_CREATE: 'http://localhost:4000/service',
-    UPDATE_SCHEDULE: 'http://localhost:4000/updateschedule',
-    BOOKING_STATUS_BASE: 'http://localhost:4000/bookings'
+    LOGIN: join(API_BASE, '/login'),
+    REGISTER: join(API_BASE, '/registration'),
+    BOOKING: join(API_BASE, '/booking'),
+    BOOKINGS_ME: join(API_BASE, '/bookings/me'),
+    PROVIDER_BOOKINGS_ME: join(API_BASE, '/providers/me/bookings'),
+    SERVICE_CREATE: join(API_BASE, '/service'),
+    UPDATE_SCHEDULE: join(API_BASE, '/updateschedule'),
+    BOOKING_STATUS_BASE: join(API_BASE, '/bookings')
 };
 
 export const bookingStatusUrl = (bookingId) => `${API_ENDPOINTS.BOOKING_STATUS_BASE}/${bookingId}/status`;
 
 // Provider list endpoint
-API_ENDPOINTS.PROVIDERS = 'http://localhost:4000/providers';
+API_ENDPOINTS.PROVIDERS = join(API_BASE, '/providers');
 
 // Handle API errors consistently
 export const handleApiError = (error) => {
