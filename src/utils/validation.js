@@ -18,6 +18,7 @@ export const API_ENDPOINTS = {
     BOOKINGS_ME: join(API_BASE, '/bookings/me'),
     PROVIDER_BOOKINGS_ME: join(API_BASE, '/providers/me/bookings'),
     SERVICE_CREATE: join(API_BASE, '/service'),
+    PROVIDER_REGISTER: join(API_BASE, '/provider'),
     UPDATE_SCHEDULE: join(API_BASE, '/updateschedule'),
     BOOKING_STATUS_BASE: join(API_BASE, '/bookings')
 };

@@ -60,6 +60,7 @@ export default function Profile() {
                     <button className="btn-secondary" onClick={() => navigate('/provider/bookings', { state: { user } })}>Clients' Bookings</button>
                     <button className="btn-secondary" onClick={() => navigate('/provider/service/new', { state: { user } })}>Create Service</button>
                     <button className="btn-secondary" onClick={() => navigate('/provider/schedule', { state: { user } })}>Edit Schedule</button>
+                    <button className="btn-secondary" onClick={() => navigate('/provider/register', { state: { user } })}>Provider Registration</button>
                   </>
                 )}
             </div>
