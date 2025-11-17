@@ -20,7 +20,8 @@ export const API_ENDPOINTS = {
     SERVICE_CREATE: join(API_BASE, '/service'),
     PROVIDER_REGISTER: join(API_BASE, '/provider'),
     UPDATE_SCHEDULE: join(API_BASE, '/updateschedule'),
-    BOOKING_STATUS_BASE: join(API_BASE, '/bookings')
+    BOOKING_STATUS_BASE: join(API_BASE, '/bookings'),
+    AUTH_GOOGLE_LOGIN: join(API_BASE, '/auth/google/login')
 };
 
 export const bookingStatusUrl = (bookingId) => `${API_ENDPOINTS.BOOKING_STATUS_BASE}/${bookingId}/status`;

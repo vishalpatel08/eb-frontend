@@ -6,30 +6,37 @@ import { emailIsValid, passwordIsValid, API_ENDPOINTS, createApiOptions } from "
 import "./login.css";
 
 export default function Login({ onSuccess }) {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const [formData, setFormData] = useState({
+        email: "",
+        password: "",
+        role: "client", // Default role
+    });
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
 
         // Validate inputs
-        if (!emailIsValid(email)) {
+        if (!emailIsValid(formData.email)) {
             setError("Please enter a valid email address.");
             return;
         }
-        if (!passwordIsValid(password)) {
+        if (!passwordIsValid(formData.password)) {
             setError("Password must be at least 6 characters.");
             return;
         }
 
         setLoading(true);
         try {
-            const res = await fetch(API_ENDPOINTS.LOGIN, createApiOptions("POST", { email, password }));
+            const res = await fetch(API_ENDPOINTS.LOGIN, createApiOptions("POST", { email: formData.email, password: formData.password, role: formData.role }));
             const data = await res.json().catch(() => null);
 
             if (!res.ok) {
@@ -42,8 +49,11 @@ export default function Login({ onSuccess }) {
             }
             // Be flexible with payload shape: some APIs return the user directly,
             // others wrap it as { user }
-            const userPayload = (data && (data.user || data)) || { email };
+            const userPayload = (data && (data.user || data)) || { email: formData.email };
             const userWithToken = { ...userPayload, token: data?.token || userPayload?.token };
+            try {
+                localStorage.setItem('user', JSON.stringify(userWithToken));
+            } catch {}
             navigate("/home", { state: { user: userWithToken }, replace: true });
         } catch (err) {
             setError(err.message || "Login failed. Please try again.");
@@ -61,8 +71,8 @@ export default function Login({ onSuccess }) {
                     id="email"
                     type="email"
                     label="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={formData.email}
+                    onChange={handleChange}
                     placeholder="you@example.com"
                     required
                     autoComplete="email"
@@ -73,8 +83,8 @@ export default function Login({ onSuccess }) {
                         id="password"
                         type={showPassword ? "text" : "password"}
                         label="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        value={formData.password}
+                        onChange={handleChange}
                         placeholder="Enter your password"
                         required
                         autoComplete="current-password"
@@ -89,6 +99,32 @@ export default function Login({ onSuccess }) {
                     </button>
                 </div>
 
+                <div className="form-group">
+                    <label>Login As</label>
+                    <div style={{ display: 'flex', gap: '16px', marginTop: '8px' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <input
+                                type="radio"
+                                name="role"
+                                value="client"
+                                checked={formData.role === 'client'}
+                                onChange={handleChange}
+                            />
+                            Client
+                        </label>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <input
+                                type="radio"
+                                name="role"
+                                value="provider"
+                                checked={formData.role === 'provider'}
+                                onChange={handleChange}
+                            />
+                            Service Provider
+                        </label>
+                    </div>
+                </div>
+
                 {error && <div className="error">{error}</div>}
 
                 <Button
@@ -98,6 +134,20 @@ export default function Login({ onSuccess }) {
                 >
                     Sign in
                 </Button>
+
+                <div style={{display:'flex', alignItems:'center', gap:8, marginTop:12}}>
+                    <div style={{height:1, background:'#e5e7eb', flex:1}}></div>
+                    <div style={{color:'#6b7280', fontSize:12}}>or</div>
+                    <div style={{height:1, background:'#e5e7eb', flex:1}}></div>
+                </div>
+                <button
+                    type="button"
+                    className="btn-secondary"
+                    style={{width:'100%', marginTop:8}}
+                    onClick={() => { window.location.href = `${API_ENDPOINTS.AUTH_GOOGLE_LOGIN}?role=${formData.role}`; }}
+                >
+                    Continue with Google
+                </button>
 
                 <div className="reg-footer">
                     <Link to="/register" className="reg-login-link">

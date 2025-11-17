@@ -28,6 +28,9 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Registration />} />
         
+        {/* OAuth callback (public) */}
+        <Route path="/oauth/callback" element={<OAuthCallback />} />
+
         {/* Protected routes */}
         <Route path="/home" element={
           <RequireAuth>
@@ -472,3 +475,57 @@ function EditSchedule() {
 }
 
 export default App
+
+function OAuthCallback() {
+  const navigate = useNavigate()
+  const [hasProcessed, setHasProcessed] = React.useState(false)
+  
+  useEffect(() => {
+    // Skip if we've already processed the OAuth callback
+    if (hasProcessed) return;
+    
+    try {
+      const params = new URLSearchParams(window.location.search)
+      const token = params.get('token')
+      
+      // Only proceed if we have a token (prevents empty second render from clearing data)
+      if (!token) {
+        console.log('No token found in URL, skipping OAuth processing')
+        return;
+      }
+      
+      const firstName = params.get('firstName') || ''
+      const lastName = params.get('lastName') || ''
+      const email = params.get('email') || ''
+      const role = params.get('role') || 'client'
+      const user = { firstName, lastName, email, role, token }
+      
+      console.log('Saving user to localStorage:', user)
+      localStorage.setItem('user', JSON.stringify(user))
+      console.log('Successfully saved user to localStorage')
+      
+      // Mark as processed to prevent duplicate processing
+      setHasProcessed(true)
+      
+      // Navigate to home with the user data
+      navigate('/home', { state: { user }, replace: true })
+    } catch (error) {
+      console.error('Error in OAuthCallback:', error)
+      
+      // Check if localStorage is available
+      try {
+        const testKey = 'test-storage';
+        localStorage.setItem(testKey, testKey);
+        localStorage.removeItem(testKey);
+        console.log('localStorage is available and working')
+      } catch (e) {
+        console.error('localStorage is not available:', e)
+      }
+    }
+  }, [])
+  return (
+    <div style={{maxWidth:560, margin:'24px auto', padding:'0 12px'}}>
+      <h2>Signing you in...</h2>
+    </div>
+  )
+}

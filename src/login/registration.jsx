@@ -156,34 +156,55 @@ export default function Registration() {
                     {errors.password && <div className="reg-error">{errors.password}</div>}
                 </label>
 
-                <fieldset className="reg-fieldset">
-                    <legend className="reg-legend">Role</legend>
-                    <label className="reg-radio">
-                        <input
-                            type="radio"
-                            name="role"
-                            value="client"
-                            checked={form.role === "client"}
-                            onChange={handleChange}
-                        />
-                        Client
-                    </label>
-                    <label className="reg-radio">
-                        <input
-                            type="radio"
-                            name="role"
-                            value="provider"
-                            checked={form.role === "provider"}
-                            onChange={handleChange}
-                        />
-                        Provider
-                    </label>
+                <div className="form-group">
+                    <label>Register As</label>
+                    <div style={{ display: 'flex', gap: '16px', marginTop: '8px' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <input
+                                type="radio"
+                                name="role"
+                                value="client"
+                                checked={form.role === 'client'}
+                                onChange={handleChange}
+                            />
+                            Client
+                        </label>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <input
+                                type="radio"
+                                name="role"
+                                value="provider"
+                                checked={form.role === 'provider'}
+                                onChange={handleChange}
+                            />
+                            Service Provider
+                        </label>
+                    </div>
                     {errors.role && <div className="reg-error">{errors.role}</div>}
-                </fieldset>
+                </div>
 
                 <button className="reg-button" type="submit" disabled={submitting}>
                     {submitting ? "Submitting..." : "Register"}
                 </button>
+
+                <div style={{display:'flex', alignItems:'center', gap:8, marginTop:12}}>
+                    <div style={{height:1, background:'#e5e7eb', flex:1}}></div>
+                    <div style={{color:'#6b7280', fontSize:12}}>or</div>
+                    <div style={{height:1, background:'#e5e7eb', flex:1}}></div>
+                </div>
+                <button
+                    type="button"
+                    className="btn-secondary"
+                    style={{width:'100%', marginTop:8}}
+                    onClick={() => {
+                        // Ensure we have a valid role before proceeding
+                        const role = form.role === 'provider' ? 'provider' : 'client';
+                        window.location.href = `${API_ENDPOINTS.AUTH_GOOGLE_LOGIN}?role=${encodeURIComponent(role)}`;
+                    }}
+                >
+                    Continue with Google as {form.role === 'provider' ? 'Service Provider' : 'Client'}
+                </button>
+
                 <div className="reg-footer">
                     <Link to="/" className="reg-login-link">Already have an account? Log in</Link>
                 </div>

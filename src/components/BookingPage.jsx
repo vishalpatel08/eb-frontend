@@ -9,7 +9,14 @@ export default function BookingPage() {
     const navigate = useNavigate();
 
     // Get the data passed from the <Link> component
-    const { service, provider, user } = location.state || {};
+    let { service, provider, user } = location.state || {};
+    if (!user && typeof window !== 'undefined') {
+        try {
+            user = JSON.parse(localStorage.getItem('user') || 'null');
+        } catch {
+            user = null;
+        }
+    }
     
     // State to hold the selected start time
     const [startTime, setStartTime] = useState('');
@@ -40,7 +47,32 @@ export default function BookingPage() {
         const BOOKING_URL = API_ENDPOINTS.BOOKING;
         
         try {
-            const token = user?.token || user?.accessToken;
+            // Resolve user/token from state and/or localStorage
+            let effectiveUser = user || null;
+
+            if (typeof window !== 'undefined') {
+                try {
+                    const stored = JSON.parse(localStorage.getItem('user') || 'null');
+                    if (!effectiveUser && stored) {
+                        // No user from navigation -> use stored user
+                        effectiveUser = stored;
+                    } else if (effectiveUser && !effectiveUser.token && !effectiveUser.accessToken && stored) {
+                        // Navigation user present but without token -> merge token from storage
+                        effectiveUser = { ...effectiveUser, token: stored.token || stored.accessToken };
+                    }
+                } catch {
+                    // ignore parse errors
+                }
+            }
+
+            const token = effectiveUser?.token || effectiveUser?.accessToken || null;
+
+            if (!token) {
+                // No token at all: send user back to login
+                navigate('/', { replace: true });
+                return;
+            }
+
             // You'll need a createPostOptions utility function for POST requests
             const res = await fetch(BOOKING_URL, createPostOptions(bookingDetails, token)); 
 
