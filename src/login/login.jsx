@@ -70,6 +70,7 @@ export default function Login({ onSuccess }) {
                 <Input
                     id="email"
                     type="email"
+                    name="email"
                     label="Email"
                     value={formData.email}
                     onChange={handleChange}
@@ -82,6 +83,7 @@ export default function Login({ onSuccess }) {
                     <Input
                         id="password"
                         type={showPassword ? "text" : "password"}
+                        name="password"
                         label="Password"
                         value={formData.password}
                         onChange={handleChange}

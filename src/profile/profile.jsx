@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { MessageSquare } from 'lucide-react';
 import './profile.css';
 
 const ROLE_LABELS = {
@@ -54,6 +55,16 @@ export default function Profile() {
             </div>
 
             <div className="profile-actions" style={{gap: 8, flexWrap: 'wrap'}}>
+                {role !== 'provider' && (
+                    <button 
+                        className="btn-primary" 
+                        onClick={() => navigate('/chats', { state: { user, otherUser: user } })}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                    >
+                        <MessageSquare size={16} />
+                        Start Chat
+                    </button>
+                )}
                 <button className="btn-primary" onClick={goToBookings}>My Bookings</button>
                 {role === 'provider' && (
                   <>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './ClientList.css';
-import { API_ENDPOINTS, createGetOptions, buildBookingStatusUrl, createPutOptionsForStatusUpdate } from '../utils/validation';
+import { API_BASE, API_ENDPOINTS, createGetOptions, buildBookingStatusUrl, createPutOptionsForStatusUpdate } from '../utils/validation';
 
 export default function ClientList({ user }) {
     const [loading, setLoading] = useState(false);
@@ -27,6 +27,13 @@ export default function ClientList({ user }) {
             const data = await res.json().catch(() => ({}));
             const list = Array.isArray(data?.bookings) ? data.bookings : [];
             setBookings(list);
+                    // preload user profiles for the bookings
+                    const ids = new Set(list.map(b => b.userId).filter(Boolean));
+                    if (ids.size > 0) {
+                        ids.forEach(id => {
+                            if (!userMap[id]) fetchUserProfile(id);
+                        })
+                    }
         } catch (e) {
             setError(e.message || 'Failed to load bookings');
         } finally {
@@ -39,6 +46,22 @@ export default function ClientList({ user }) {
         (async () => { if (mounted) await loadBookings(); })();
         return () => { mounted = false; };
     }, [user]);
+
+    const [userMap, setUserMap] = useState({});
+
+    const fetchUserProfile = async (id) => {
+        try {
+            const token = getToken();
+            const url = `${API_BASE.replace(/\/+$/,'')}/api/users/${id}`;
+            const res = await fetch(url, createGetOptions(token));
+            if (!res.ok) return;
+            const data = await res.json().catch(() => null);
+            if (!data) return;
+            setUserMap(prev => ({ ...prev, [id]: data }));
+        } catch (e) {
+            // ignore
+        }
+    };
 
     const pending = bookings.filter(b => String(b.status || '').toLowerCase() === 'scheduled');
 
@@ -79,7 +102,7 @@ export default function ClientList({ user }) {
                                     {String(booking.userId || '').slice(-2).toUpperCase()}
                                 </div>
                                 <div className="booking-info">
-                                    <h3>Client: {String(booking.userId)}</h3>
+                                    <h3>Client: {userMap[booking.userId] ? `${userMap[booking.userId].firstName || ''} ${userMap[booking.userId].lastName || ''}`.trim() : String(booking.userId)}</h3>
                                     <p className="booking-service">Service: {String(booking.serviceId)}</p>
                                 </div>
                                 <div className={`booking-status pending`}>waiting</div>

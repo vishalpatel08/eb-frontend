@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-// Import Link from react-router-dom
-import { useParams, useLocation, Link } from 'react-router-dom';
+import { useParams, useLocation, Link, useNavigate } from 'react-router-dom';
+import { MessageSquare } from 'lucide-react';
 import { API_ENDPOINTS, createGetOptions } from '../utils/validation';
 import './ProviderDetails.css';
 
 export default function ProviderDetails() {
     const { id } = useParams();
     const location = useLocation();
+    const navigate = useNavigate();
     // Try to get provider from navigation state, else fetch by id
     const initialProvider = location.state?.provider || null;
     const stateUser = location.state?.user || null;
@@ -164,6 +165,25 @@ export default function ProviderDetails() {
                             <span className={`status-badge ${provider?.status || 'available'}`}>
                                 {provider?.status || 'Available'}
                             </span>
+                            {user && (
+                                <button 
+                                    className="chat-button" 
+                                    onClick={() => navigate('/chats', { 
+                                        state: { 
+                                            user: user,
+                                            otherUser: {
+                                                _id: provider?.userId || id,
+                                                firstName: provider?.firstName,
+                                                lastName: provider?.lastName,
+                                                email: provider?.email
+                                            }
+                                        } 
+                                    })}
+                                    title="Start Chat"
+                                >
+                                    <MessageSquare size={16} /> Chat
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>

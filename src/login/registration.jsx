@@ -68,14 +68,19 @@ export default function Registration() {
 
             // Build user object with token so authenticated requests work
             const token = data?.token;
-            const userPayload = {
-                firstName: form.firstName,
-                lastName: form.lastName,
-                email: form.email,
-                phoneNumber: form.phoneNumber,
-                role: form.role,
-                token,
-            };
+            // Prefer backend user payload (which should now include an _id) but
+            // fall back to the local form values if needed
+            const backendUser = data && data.user ? data.user : null;
+            const userPayload = backendUser
+                ? { ...backendUser, token }
+                : {
+                    firstName: form.firstName,
+                    lastName: form.lastName,
+                    email: form.email,
+                    phoneNumber: form.phoneNumber,
+                    role: form.role,
+                    token,
+                };
             if (token) {
                 try { localStorage.setItem('user', JSON.stringify(userPayload)); } catch (_) {}
             }

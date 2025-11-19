@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { MessageSquare } from 'lucide-react'; // Make sure to install lucide-react if not already
 import './Header.css';
 
 export default function Header({ user }) {
@@ -17,6 +18,11 @@ export default function Header({ user }) {
                     EB Services
                 </Link>
                 <div className="header-right">
+                    {user && (
+                        <Link to="/chats" className="chat-button" title="Messages">
+                            <MessageSquare size={24} />
+                        </Link>
+                    )}
                     <button 
                         className="profile-button" 
                         onClick={handleProfileClick}

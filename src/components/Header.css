@@ -73,3 +73,26 @@
         display: none;
     }
 }
+
+.chat-button {
+    background: none;
+    border: none;
+    color: #3b82f6;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    margin-right: 12px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.chat-button:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
+}
+
+.chat-button svg {
+    vertical-align: middle;
+}

@@ -5,7 +5,8 @@ import Profile from './profile/profile'
 import Home from './home/Home'
 import ProviderDetails from './components/ProviderDetails'
 import BookingPage from './components/BookingPage'
-import { API_ENDPOINTS, createGetOptions, createPostOptions, createPutOptions } from './utils/validation'
+import { ChatContainer } from './components/chat/ChatContainer';
+import { API_BASE, API_ENDPOINTS, createGetOptions, createPostOptions, createPutOptions } from './utils/validation'
 import React, { useEffect, useState } from 'react'
 
 // Protected Route wrapper
@@ -17,7 +18,18 @@ function RequireAuth({ children }) {
   if (!user) {
     return <Navigate to="/" replace />;
   }
-  return children;
+  // derive a stable userId to pass into protected children (covers different payload shapes)
+  const derivedUserId = user?._id || user?.id || user?.userId || user?.uid || null;
+  // Ensure we return a single React element (the protected child) with injected props
+  try {
+    const onlyChild = React.Children.only(children);
+    return React.cloneElement(onlyChild, { currentUser: user, userId: derivedUserId });
+  } catch (e) {
+    // Fallback to mapping if multiple children were provided for some reason
+    return React.Children.map(children, child => 
+      React.cloneElement(child, { currentUser: user, userId: derivedUserId })
+    );
+  }
 }
 
 function App() {
@@ -70,6 +82,11 @@ function App() {
         <Route path="/provider/schedule" element={
           <RequireAuth>
             <EditSchedule />
+          </RequireAuth>
+        } />
+        <Route path="/chats" element={
+          <RequireAuth>
+            <ChatContainer />
           </RequireAuth>
         } />
         <Route path="/provider/register" element={
@@ -153,6 +170,7 @@ function MyBookings() {
   const [error, setError] = useState(null)
   const [bookings, setBookings] = useState([])
   const [tab, setTab] = useState('upcoming')
+  
 
   useEffect(() => {
     let mounted = true
@@ -265,6 +283,7 @@ function ProviderBookings() {
   const [error, setError] = useState(null)
   const [bookings, setBookings] = useState([])
   const [tab, setTab] = useState('upcoming')
+  const [providerUserMap, setProviderUserMap] = useState({})
 
   useEffect(() => {
     let mounted = true
@@ -298,6 +317,49 @@ function ProviderBookings() {
 
   const fmt = (iso) => { try { return new Date(iso).toLocaleString() } catch { return String(iso) } }
 
+  // Fetch client profiles for bookings so provider sees names
+  useEffect(() => {
+    let mounted = true
+    const toFetch = new Set()
+    bookings.forEach(b => {
+      // If booking already contains a user object, seed the map immediately
+      if (b.user && typeof b.user === 'object') {
+        const idKey = b.user._id || b.user.id || null
+        if (idKey) setProviderUserMap(prev => ({ ...prev, [idKey]: b.user }))
+        return
+      }
+      const clientId = b.userId || b.clientId || null
+      if (clientId) toFetch.add(clientId)
+    })
+    console.log("to Fetch", toFetch.size)
+    if (toFetch.size === 0) return
+
+    const fetchProfile = async (id) => {
+      try {
+        const url = `${API_BASE.replace(/\/+$/,'')}/api/users/${id}`
+        console.log(" checking ")
+        console.log(id)
+        console.log(url)
+        const tokenToUse = token || localStorage.getItem('token') || null
+        const res = await fetch(url, createGetOptions(tokenToUse))
+        if (!res.ok) return
+        const data = await res.json().catch(() => null)
+        if (!mounted || !data) return
+        console.log(" 111 d", data)
+        setProviderUserMap(prev => ({ ...prev, [id]: data }))
+      } catch (e) {
+        console.log(" Error in fetching the users", e)
+        // ignore individual failures
+      }
+    }
+
+    console.log(" providerUsermap", providerUserMap)
+
+    toFetch.forEach(id => { fetchProfile(id) })
+
+    return () => { mounted = false }
+  }, [bookings, token])
+
   return (
     <div style={{maxWidth: 900, margin: '24px auto', padding: '0 12px'}}>
       <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: 12}}>
@@ -317,30 +379,46 @@ function ProviderBookings() {
         <div className="muted">No {tab} bookings.</div>
       )}
       <div className="booking-list">
-        {byTab.map(b => (
-          <div key={String(b._id || b.id)} className="booking-row">
-            <div className="booking-col">
-              <div className="label">Client</div>
-              <div className="value">{String(b.userId)}</div>
+        {byTab.map(b => {
+          let client = null
+          let clientId = null
+          if (b.user && typeof b.user === 'object') {
+            client = b.user
+            clientId = b.user._id || b.user.id || null
+          } else {
+            clientId = b.userId || b.clientId || null
+            client = clientId ? providerUserMap[clientId] : null
+          }
+          const clientName = client ? `${client.firstName || ''} ${client.lastName || ''}`.trim() : (clientId ? `User ${String(clientId).substring(0,6)}` : 'Unknown')
+          return (
+            <div key={String(b._id || b.id)} className="booking-row">
+              <div className="booking-col">
+                <div className="label">Client</div>
+                <div className="value" style={{display:'flex', gap:8, alignItems:'center'}}>
+                  <span style={{cursor:'pointer', textDecoration:'underline'}} onClick={() => navigate('/profile', { state: { user: client || { _id: clientId, firstName: clientName } } })}>
+                    {clientName}
+                  </span>
+                </div>
+              </div>
+              <div className="booking-col">
+                <div className="label">Service</div>
+                <div className="value">{String(b.serviceId)}</div>
+              </div>
+              <div className="booking-col">
+                <div className="label">Start</div>
+                <div className="value">{fmt(b.startTime)}</div>
+              </div>
+              <div className="booking-col">
+                <div className="label">End</div>
+                <div className="value">{fmt(b.endTime)}</div>
+              </div>
+              <div className="booking-col">
+                <div className="label">Status</div>
+                <div className="value">{b.status}</div>
+              </div>
             </div>
-            <div className="booking-col">
-              <div className="label">Service</div>
-              <div className="value">{String(b.serviceId)}</div>
-            </div>
-            <div className="booking-col">
-              <div className="label">Start</div>
-              <div className="value">{fmt(b.startTime)}</div>
-            </div>
-            <div className="booking-col">
-              <div className="label">End</div>
-              <div className="value">{fmt(b.endTime)}</div>
-            </div>
-            <div className="booking-col">
-              <div className="label">Status</div>
-              <div className="value">{b.status}</div>
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
       <style>{`
         .tab-btn{ border:none; padding:8px 12px; border-radius:8px; background:#eef2ff; color:#3730a3; font-weight:600; cursor:pointer }
@@ -498,7 +576,11 @@ function OAuthCallback() {
       const lastName = params.get('lastName') || ''
       const email = params.get('email') || ''
       const role = params.get('role') || 'client'
-      const user = { firstName, lastName, email, role, token }
+      // userId comes from the backend GoogleCallback query param
+      const userId = params.get('userId') || ''
+      const user = userId
+        ? { _id: userId, firstName, lastName, email, role, token }
+        : { firstName, lastName, email, role, token }
       
       console.log('Saving user to localStorage:', user)
       localStorage.setItem('user', JSON.stringify(user))
