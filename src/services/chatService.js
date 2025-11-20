@@ -14,36 +14,54 @@ class ChatService {
       this.disconnect();
     }
 
-    // Determine WebSocket base URL
-    const envWsBase = import.meta.env.VITE_WS_URL;
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const defaultBackendHost = window.location.hostname + ':4000';
-    const base = envWsBase || `${wsProtocol}//${defaultBackendHost}`;
-    const normalizedBase = base.endsWith('/') ? base.slice(0, -1) : base;
-    const wsUrl = `${normalizedBase}/ws?userId=${userId}`;
-
-    console.log('Connecting to WebSocket:', wsUrl, 'userId=', userId);
-
+    // Determine WebSocket base URL from centralized config
     try {
+      // lazy import so module stays usable in non-browser test environments
+      // prefer explicit Vite env or provided config
+      // eslint-disable-next-line global-require
+      const { WS_BASE_URL } = require('../config');
+      const base = WS_BASE_URL;
+      const normalizedBase = base.endsWith('/') ? base.slice(0, -1) : base;
+      const wsUrl = `${normalizedBase}/ws?userId=${userId}`;
       this.socket = new WebSocket(wsUrl);
     } catch (err) {
-      console.error('WebSocket constructor threw error:', err);
-      this._notifyConnection(false);
+      // fallback (shouldn't normally happen in browser)
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const defaultBackendHost = window.location.hostname + ':4000';
+      const base = `${wsProtocol}//${defaultBackendHost}`;
+      const normalizedBase = base.endsWith('/') ? base.slice(0, -1) : base;
+      const wsUrl = `${normalizedBase}/ws?userId=${userId}`;
+      try {
+        this.socket = new WebSocket(wsUrl);
+      } catch (e) {
+        console.error('WebSocket constructor threw error (fallback):', e);
+        this._notifyConnection(false);
+        return;
+      }
       return;
     }
 
     this.socket.onopen = () => {
-      console.log('WebSocket connected');
       this.connectionHandlers.forEach(handler => handler(true));
       this.reconnectAttempts = 0;
     };
 
     this.socket.onmessage = (event) => {
       try {
-        const message = JSON.parse(event.data);
-        this.messageHandlers.forEach(handler => handler(message));
+        // Server may send multiple JSON objects in one websocket frame (each encoder.Encode adds a newline).
+        // Handle newline-delimited JSON (NDJSON) by splitting on newlines and parsing each non-empty line.
+        const text = event.data;
+        const lines = String(text).split(/\r?\n/).filter(Boolean);
+        lines.forEach(line => {
+          try {
+            const message = JSON.parse(line);
+            this.messageHandlers.forEach(handler => handler(message));
+          } catch (err) {
+            console.error('Error parsing JSON line from websocket:', err, 'line=', line);
+          }
+        });
       } catch (error) {
-        console.error('Error parsing message:', error);
+        console.error('Error handling websocket message event:', error);
       }
     };
 

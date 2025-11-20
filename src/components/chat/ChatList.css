@@ -1,16 +1,21 @@
 /* components/chat/ChatList.css */
 .chat-list {
-  width: 300px;
+  flex: 0 0 320px;
   height: 100%;
-  border-right: 1px solid #e0e0e0;
+  border-right: 1px solid rgba(0,0,0,0.06);
   display: flex;
   flex-direction: column;
-  background-color: #fff;
+  /* Use Palette A for chat list background */
+  background: var(--paletteA-bg);
+  background-size: cover;
+  color: var(--text);
+  border-radius: 10px 0 0 10px;
+  overflow: hidden;
 }
 
 .chat-list-header {
-  padding: 15px;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
 }
 
 .chat-list-items {
@@ -28,14 +33,17 @@
 }
 
 .chat-list-item:hover {
-  background-color: #f9f9f9;
+  background-color: rgba(255,255,255,0.06);
 }
+
+.clickable{ cursor: pointer }
+.chat-name.clickable{ text-decoration: underline }
 
 .chat-avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #4caf50;
+  background: var(--paletteA-secondary);
   color: white;
   display: flex;
   align-items: center;
@@ -56,8 +64,8 @@
 }
 
 .chat-name {
-  font-weight: 500;
-  color: #333;
+  font-weight: 600;
+  color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -65,7 +73,7 @@
 
 .chat-time {
   font-size: 0.8rem;
-  color: #9e9e9e;
+  color: var(--text-secondary);
   white-space: nowrap;
   margin-left: 8px;
 }

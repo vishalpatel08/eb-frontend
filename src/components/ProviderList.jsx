@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './ProviderList.css';
 import { API_ENDPOINTS, createGetOptions } from '../utils/validation';
+import { getId } from '../utils/normalize';
 import { useNavigate } from 'react-router-dom';
 
 export default function ProviderList({ user }) {
@@ -43,10 +44,10 @@ export default function ProviderList({ user }) {
             <div className="provider-grid">
                 {providers.map(provider => (
                     <div 
-                        key={provider.id} 
+                        key={getId(provider) || provider.id} 
                         className="provider-card clickable" 
                         // This is the parent click handler
-                        onClick={() => navigate(`/provider/${provider.userId || provider.id}`, { state: { provider, user } })}
+                        onClick={() => navigate(`/provider/${getId(provider) || provider.id}`, { state: { provider, user } })}
                     >
                         <div className="provider-avatar">
                             {provider.firstName?.[0]}{provider.lastName?.[0]}
@@ -65,7 +66,7 @@ export default function ProviderList({ user }) {
                                 e.stopPropagation(); 
                                 
                                 // 2. Perform the same navigation as the parent card
-                                navigate(`/provider/${provider.userId || provider.id}`, { state: { provider, user } });
+                                navigate(`/provider/${getId(provider) || provider.id}`, { state: { provider, user } });
                             }}
                         >
                             Book Now

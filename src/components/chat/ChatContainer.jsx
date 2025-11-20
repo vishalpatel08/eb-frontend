@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ChatList } from './ChatList';
 import { ChatWindow } from './ChatWindow';
 import { ChatProvider } from '../../contexts/ChatContext';
+import { getId } from '../../utils/normalize';
 import './ChatContainer.css';
 
 export const ChatContainer = ({ currentUser, userId }) => {
@@ -16,14 +17,14 @@ export const ChatContainer = ({ currentUser, userId }) => {
   useEffect(() => {
     if (location.state?.otherUser) {
       setInitialChat({
-        userId: location.state.otherUser._id,
+        userId: getId(location.state.otherUser),
         userName: `${location.state.otherUser.firstName} ${location.state.otherUser.lastName}`
       });
     }
   }, [location.state]);
 
   // prefer explicit userId prop (injected by RequireAuth) but fall back to currentUser._id
-  const providedUserId = userId || currentUser?._id;
+  const providedUserId = userId || getId(currentUser);
 
   return (
     <ChatProvider currentUser={currentUser} userId={providedUserId}>

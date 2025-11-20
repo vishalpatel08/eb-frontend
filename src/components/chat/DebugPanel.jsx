@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { chatService } from '../../services/chatService';
+import './DebugPanel.css';
+import { API_BASE_URL } from '../../config';
 
 export const DebugPanel = () => {
   const [readyState, setReadyState] = useState(chatService.getReadyState());
@@ -17,9 +19,7 @@ export const DebugPanel = () => {
   }, []);
 
   const fetchOnline = async () => {
-    // Use the same logic as other files to determine API base URL
-    const API_BASE_URL = window._env_?.REACT_APP_API_URL || 'http://localhost:4000/api';
-    const url = `${API_BASE_URL.replace(/\/$/, '')}/debug/online-users`;
+    const url = `${API_BASE_URL.replace(/\/\+$/,'')}/api/debug/online-users`;
     try {
       const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
       const text = await res.text();
@@ -36,14 +36,14 @@ export const DebugPanel = () => {
   };
 
   return (
-    <div style={{padding:10, border:'1px solid #eee', background:'#fafafa', fontSize:12}}>
+    <div className="debug-panel">
       <div><strong>WebSocket readyState:</strong> {readyState}</div>
       <div><strong>Reconnect attempts:</strong> {attempts}</div>
       <div><strong>Last error:</strong> {String(lastError)}</div>
-      <div style={{marginTop:8}}>
+      <div className="controls">
         <button onClick={fetchOnline}>Fetch /api/debug/online-users</button>
       </div>
-      <pre style={{whiteSpace:'pre-wrap', marginTop:8}}>{onlineUsers ? JSON.stringify(onlineUsers, null, 2) : 'No data'}</pre>
+      <pre>{onlineUsers ? JSON.stringify(onlineUsers, null, 2) : 'No data'}</pre>
     </div>
   );
 };

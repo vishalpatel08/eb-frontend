@@ -5,9 +5,9 @@ export const emailIsValid = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.t
 export const passwordIsValid = (password, minLength = 6) => password.length >= minLength;
 
 // API base and endpoints
-export const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL)
-    || (typeof window !== 'undefined' && window.__API_BASE__)
-    || 'http://localhost:4000';
+import { API_BASE_URL } from '../config';
+
+export const API_BASE = API_BASE_URL;
 
 const join = (base, path) => `${String(base).replace(/\/+$/,'')}/${String(path).replace(/^\/+/, '')}`;
 

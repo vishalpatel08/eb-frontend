@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import './ChatList.css';
 import { API_BASE, createGetOptions } from '../../utils/validation';
+import { getId } from '../../utils/normalize';
 
 export const ChatList = ({ currentUser }) => {
   const { recentChats, fetchRecentChats, setActiveChat } = useChat();
@@ -21,14 +22,14 @@ export const ChatList = ({ currentUser }) => {
   const candidateIdFromChat = (chat) => {
     if (!chat) return null;
     if (chat.userId) return chat.userId;
-    if (chat.user && (chat.user._id || chat.user.id)) return chat.user._id || chat.user.id;
+    if (chat.user) return getId(chat.user);
     if (chat.otherUserId) return chat.otherUserId;
     if (chat.participants && Array.isArray(chat.participants)) {
-      const other = chat.participants.find(p => String(p) !== String(currentUser?._id));
+      const other = chat.participants.find(p => String(p) !== String(getId(currentUser)));
       if (other) return other;
     }
-    if (chat.user1 && chat.user2 && currentUser?._id) {
-      return String(chat.user1) === String(currentUser._id) ? chat.user2 : chat.user1;
+    if (chat.user1 && chat.user2 && getId(currentUser)) {
+      return String(chat.user1) === String(getId(currentUser)) ? chat.user2 : chat.user1;
     }
     return null;
   };
@@ -38,9 +39,14 @@ export const ChatList = ({ currentUser }) => {
     const fetchUser = async (id) => {
       try {
         const url = `${API_BASE.replace(/\/+$/,'')}/api/users/${id}`;
+        // Debug: log which user id and URL we're fetching
+        console.debug('[ChatList] fetchUser id=', id, 'url=', url);
         const token = currentUser?.token || currentUser?.accessToken || localStorage.getItem('token') || null;
         const res = await fetch(url, createGetOptions(token));
-        if (!res.ok) return;
+        if (!res.ok) {
+          console.warn('[ChatList] fetchUser non-ok response for id=', id, 'status=', res.status);
+          return;
+        }
         const data = await res.json().catch(() => null);
         if (!mounted || !data) return;
         setUserMap(prev => ({ ...prev, [id]: data }));
@@ -74,14 +80,13 @@ export const ChatList = ({ currentUser }) => {
           return (
             <div 
               key={otherId || idx} 
-              className="chat-list-item"
+              className="chat-list-item clickable"
               onClick={() => setActiveChat({ userId: otherId, userName: displayName })}
-              style={{cursor:'pointer'}}
             >
               {/* avatar removed to keep chat list simple */}
               <div className="chat-info">
                 <div className="chat-header">
-                  <span className="chat-name" style={{cursor:'pointer'}} onClick={(e) => { e.stopPropagation();
+                  <span className="chat-name clickable" onClick={(e) => { e.stopPropagation();
                     // navigate to profile view for this user when provider clicks name
                     if ((currentUser?.role || '').toLowerCase() === 'provider') {
                       navigate('/profile', { state: { user: userInfo || { _id: otherId, firstName: displayName } } });

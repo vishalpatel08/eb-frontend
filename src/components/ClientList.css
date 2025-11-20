@@ -66,13 +66,13 @@
 }
 
 .booking-status.pending {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--paletteB-bg);
+    color: var(--paletteB-primary);
 }
 
 .booking-status.confirmed {
-    background: #dcfce7;
-    color: #166534;
+    background: rgba(255,107,53,0.08); /* subtle warm tone */
+    color: var(--paletteB-primary);
 }
 
 .booking-details {
@@ -116,7 +116,7 @@
 }
 
 .action-button.accept {
-    background: var(--accent);
+    background: var(--btn-bg);
     color: white;
 }
 
@@ -128,10 +128,6 @@
 @media (max-width: 640px) {
     .client-list {
         padding: 16px;
-    }
-    
-    .booking-details {
-        grid-template-columns: 1fr;
         gap: 8px;
     }
     

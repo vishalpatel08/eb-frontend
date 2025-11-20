@@ -3,31 +3,42 @@
    can remain focused on component-level styles. */
 
 :root{
-    /* Standard 5-color palette (primary, secondary, accent, background, text)
-       Primary: blue-600, Secondary: teal-600, Accent: amber/orange
-       Background: very light neutral, Text: dark slate */
-    --color-primary: #2B6CB0; /* blue-600 */
-    --color-secondary: #2C7A7B; /* teal-600 */
-    --color-accent: #ED8936; /* amber/orange */
-    --color-background: #F7FAFC; /* light neutral */
-    --color-text: #1A202C; /* dark slate */
+     /* User-chosen palette — Forest / Moss / Terra Cotta
+         Primary: Forest Green, Secondary: Moss Green, Accent: Terra Cotta
+         Background: Light Beige, Text: Dark Olive */
+    /* Primary set to Deep Berry per user request */
+    --color-primary: #6A0572; /* Deep Berry */
+    --color-secondary: #588157; /* Moss Green */
+    --color-accent: #DDA15E; /* Terra Cotta */
+    --color-background: #ECE9DF; /* Greige (grey + yellowish) */
+    --color-text: #283618; /* Dark Olive */
 
-    /* Derived semantic tokens (keep compatibility with components) */
-    --background: var(--color-background);
-    --page-bg: var(--background);
-    --surface: #FFFFFF;
-    --border: #E6EEF6; /* light border based on background */
-    --border-hover: #D1E3EF;
-    --card-shadow: 0 6px 18px rgba(26, 32, 44, 0.06);
+     /* Derived semantic tokens */
+     --background: var(--color-background);
+     --bg: var(--background);
+     --page-bg: var(--background);
+     --surface: #FFFFFF;
+    --border: #E9E6DA; /* subtle border tuned for greige bg */
+    --border-hover: #E0DDCF;
+     --card-shadow: 0 6px 18px rgba(40,54,24,0.06);
 
-    --text: var(--color-text);
-    --text-primary: var(--color-text);
-    --text-secondary: #4A5568; /* muted slate */
-    --text-tertiary: #718096;
+     --text: var(--color-text);
+     --text-primary: var(--color-text);
+     --text-secondary: #556B4A; /* muted olive */
+     --text-tertiary: #7A826B;
 
-    --accent: var(--color-primary);
-    --accent-600: var(--color-secondary);
-    --accent-muted: rgba(43,108,176,0.08);
+     --accent: var(--color-primary);
+     --accent-600: var(--color-secondary);
+     --muted: #7A826B;
+    --accent-muted: rgba(106,5,114,0.08);
+
+    /* Page dim overlay (50% black) — applied above the page gradient to uniformly dim the UI */
+    --page-dim-overlay: rgba(0,0,0,0.5);
+
+     /* Page and accent gradients */
+    --page-gradient: linear-gradient(180deg, #ECE9DF 0%, #FFFFFF 100%);
+    --accent-gradient: linear-gradient(90deg, #6A0572 0%, #588157 100%);
+    --accent-color: #6A0572;
 
     --success: #2F855A;
     --error: #C53030;
@@ -36,6 +47,29 @@
     --radius: 12px;
     --fw-regular: 400;
     --fw-semibold: 600;
+
+    /* Palette A - Calm Coastal (used for chat section) */
+    --paletteA-primary: #0B6E78; /* Deep Teal */
+    --paletteA-secondary: #2FA6B3; /* Seafoam */
+    --paletteA-accent: #FFB86B; /* Warm Sand */
+    --paletteA-bg: #E6F6F7; /* Pale Aqua */
+    --paletteA-text: #102027; /* Charcoal */
+    --paletteA-gradient: linear-gradient(90deg, #0B6E78 0%, #2FA6B3 100%);
+
+    /* Palette B - Warm Sunrise (used for booking / action buttons) */
+    --paletteB-primary: #FF6B35; /* Coral */
+    --paletteB-secondary: #FFA552; /* Apricot */
+    --paletteB-accent: #FFCF9C; /* Light Peach */
+    --paletteB-bg: #FFF6EE; /* Soft Cream */
+    --paletteB-text: #222222; /* Almost Black */
+    --paletteB-gradient: linear-gradient(90deg, #FF6B35 0%, #FFA552 100%);
+
+    /* Global blue gradient for action buttons (user requested) */
+    --blue-gradient: linear-gradient(90deg, #2B6CB0 0%, #4F46E5 100%);
+    /* Button color tokens: use Deep Berry with a slightly darker hover shade */
+    --color-primary-dim: #5A0460;
+    --btn-bg: var(--color-primary);
+    --btn-bg-hover: var(--color-primary-dim);
 }
 
 /* Box sizing and sensible defaults */
@@ -54,7 +88,11 @@ body{
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     color: var(--text);
     font-weight: var(--fw-regular);
-    background: var(--page-bg);
+    /* Use requested full-page gradient and ensure it fills viewport. A dim overlay is applied on top. */
+    min-height: 100vh;
+    background: linear-gradient(var(--page-dim-overlay), var(--page-dim-overlay)), var(--page-gradient);
+    background-attachment: fixed;
+    background-size: cover;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -67,8 +105,10 @@ h1,h2,h3,h4{
 
 /* Generic container to center content */
 .container{
+    /* Center content to occupy middle 80% with 10% margins on each side */
+    width: 80%;
     max-width: 1280px;
-    margin: 0 auto;
+    margin: 0 10%;
     padding: 16px;
 }
 
@@ -104,8 +144,8 @@ h1,h2,h3,h4{
 
 .input:focus {
     outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(58,90,64,0.12);
 }
 
 .input.invalid {
@@ -122,17 +162,17 @@ h1,h2,h3,h4{
     width: 100%;
     padding: 10px 12px;
     font-size: 15px;
-    background: var(--accent);
+    background: var(--btn-bg);
     color: white;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     font-weight: var(--fw-semibold);
-    transition: opacity 0.15s ease, background-color 0.15s ease;
+    transition: opacity 0.12s ease, filter 0.12s ease, background-color 0.12s ease;
 }
 
 .submit-btn:hover, .btn:hover {
-    background: #4f46e5;
+    background: var(--btn-bg-hover);
 }
 
 .submit-btn[disabled], .btn[disabled] {
@@ -153,8 +193,8 @@ h1,h2,h3,h4{
 }
 
 .toggle-btn:hover {
-    border-color: var(--accent);
-    background-color: rgba(99,102,241,0.04);
+    border-color: var(--btn-bg-hover);
+    background-color: rgba(106,5,114,0.04);
 }
 
 /* Utility helpers */

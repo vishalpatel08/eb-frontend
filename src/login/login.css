@@ -30,6 +30,14 @@
     margin-bottom: 16px;
 }
 
+.radio-row{ display:flex; gap:16px; margin-top:8px }
+.radio-label{ display:flex; align-items:center; gap:6px }
+
+.or-row{ display:flex; align-items:center; gap:8px; margin-top:12px }
+.or-line{ height:1px; background: var(--border); flex:1 }
+.or-text{ color: var(--text-secondary); font-size:12px }
+.full-width{ width:100%; margin-top:8px }
+
 .password-row .form-field {
     flex: 1;
     margin-bottom: 0;

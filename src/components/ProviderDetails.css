@@ -88,8 +88,12 @@
 .service-price { font-size: 1.15rem; font-weight: 600; color: var(--text-primary); }
 .currency { font-size: 0.85rem; margin-right: 0.125rem; }
 
-.book-service-btn { background: var(--accent); color: #ffffff; padding: 0.45rem 0.9rem; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
-.book-service-btn:hover { background: var(--accent-600); }
+.book-service-btn { background: var(--btn-bg); color: #ffffff; padding: 0.45rem 0.9rem; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+.book-service-btn:hover { background: var(--btn-bg-hover); }
+
+.book-service-btn.status-accepted { background: var(--btn-bg); }
+.book-service-btn.status-waiting { background: var(--paletteB-bg); color: var(--paletteB-primary); }
+.book-service-btn[disabled] { opacity: 0.9; cursor: not-allowed }
 
 .provider-info-section { align-self: start; }
 .provider-info-card { background: var(--surface); border-radius: 8px; border: 1px solid var(--border); box-shadow: var(--card-shadow); overflow: hidden; }

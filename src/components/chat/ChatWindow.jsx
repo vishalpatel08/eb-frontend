@@ -1,6 +1,7 @@
 // components/chat/ChatWindow.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import { useChat } from '../../contexts/ChatContext';
+import { getId } from '../../utils/normalize';
 import { format, parseISO } from 'date-fns';
 import './ChatWindow.css';
 import { Loader2 } from 'lucide-react';
@@ -32,9 +33,12 @@ export const ChatWindow = ({ currentUser, initialChat }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // When switching to a different chat, scroll to the bottom once
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, activeChat]);
+    if (activeChat) {
+      scrollToBottom();
+    }
+  }, [activeChat]);
 
   const parseDate = (value) => {
     if (!value) return null;
@@ -71,12 +75,22 @@ export const ChatWindow = ({ currentUser, initialChat }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const msg = message.trim();
-    if (!msg || !isConnected || !activeChat || isSending) return;
-    
+    // Allow sending even when WebSocket is disconnected; HTTP fallback will persist messages.
+    if (!msg || !activeChat || isSending) return;
+    console.debug('[ChatWindow] submit: isConnected=', isConnected, 'activeChat=', activeChat?.userId);
     try {
       setIsSending(true);
-      await sendMessage(msg, activeChat.userId);
-      setMessage('');
+      console.debug('[ChatWindow] sending message:', msg, 'to', activeChat.userId, 'isConnected=', isConnected);
+      const ok = await sendMessage(msg, activeChat.userId);
+      console.debug('[ChatWindow] sendMessage returned:', ok);
+      if (ok) {
+        setMessage('');
+        // After the current user sends a message, scroll to bottom once
+        scrollToBottom();
+      } else {
+        // keep the message in the input so user can retry; surface a console note
+        console.warn('[ChatWindow] message not saved (sendMessage returned false)');
+      }
     } catch (error) {
       console.error('Error sending message:', error);
     } finally {
@@ -122,8 +136,9 @@ export const ChatWindow = ({ currentUser, initialChat }) => {
     );
   }
 
-  const chatMessages = messages[`${currentUser._id}_${activeChat.userId}`] || 
-                      messages[`${activeChat.userId}_${currentUser._id}`] || 
+  const curId = getId(currentUser);
+  const chatMessages = messages[`${curId}_${activeChat.userId}`] || 
+                      messages[`${activeChat.userId}_${curId}`] || 
                       [];
 
   return (
@@ -143,7 +158,7 @@ export const ChatWindow = ({ currentUser, initialChat }) => {
           </div>
         ) : (
           chatMessages.map((msg, index) => {
-            const isCurrentUser = msg.senderId === currentUser._id;
+            const isCurrentUser = msg.senderId === curId;
             const prevSender = chatMessages[index - 1]?.senderId;
             const nextMsg = chatMessages[index + 1];
             const showAvatar = index === 0 || prevSender !== msg.senderId;
@@ -200,12 +215,12 @@ export const ChatWindow = ({ currentUser, initialChat }) => {
           }}
           placeholder="Type a message..."
           className="message-input"
-          disabled={!isConnected || isSending || !activeChat}
+          disabled={isSending || !activeChat}
         />
         <button 
           type="submit" 
           className="send-button"
-          disabled={!isConnected || !message.trim() || isSending || !activeChat}
+          disabled={!message.trim() || isSending || !activeChat}
         >
           {isSending ? (
             <Loader2 className="animate-spin" size={18} />

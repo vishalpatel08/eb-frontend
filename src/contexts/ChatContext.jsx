@@ -1,10 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { chatService } from '../services/chatService';
-
-// In ChatContext.jsx
-const API_BASE_URL = import.meta.env.VITE_API_URL;
-const WS_URL = import.meta.env.VITE_WS_URL;
+import { getId } from '../utils/normalize';
+import { API_BASE_URL } from '../config';
 
 export const ChatContext = createContext();
 
@@ -19,7 +17,7 @@ export const useChat = () => {
 
 export const ChatProvider = ({ children, userId, currentUser }) => {
   // Derive an effective userId from props or currentUser
-  const effectiveUserId = userId || currentUser?._id || currentUser?.id || currentUser?.userId;
+  const effectiveUserId = userId || getId(currentUser);
 
   // State
   const [isConnected, setIsConnected] = useState(false);
@@ -32,21 +30,17 @@ export const ChatProvider = ({ children, userId, currentUser }) => {
   // WebSocket Connection
   useEffect(() => {
     if (effectiveUserId) {
-      console.log('[ChatContext] Connecting WebSocket for userId:', effectiveUserId);
       chatService.connect(effectiveUserId);
       return () => {
-        console.log('[ChatContext] Disconnecting WebSocket for userId:', effectiveUserId);
         chatService.disconnect();
       };
-    } else {
-      console.log('[ChatContext] No userId provided (prop or currentUser), WebSocket not connected');
     }
   }, [effectiveUserId]);
 
-  console.log("[ChatContext] effectiveUserId =", effectiveUserId);
 
   // Message Handlers
   const handleMessage = useCallback((newMessage) => {
+    console.debug('[ChatContext] handleMessage received:', newMessage);
     const chatId = [newMessage.senderId, newMessage.receiverId]
       .sort()
       .join('_');
@@ -85,21 +79,21 @@ export const ChatProvider = ({ children, userId, currentUser }) => {
   }, []);
 
   const handleConnectionChange = useCallback((connected) => {
-    console.log('[ChatContext] Connection state changed. isConnected =', connected);
     setIsConnected(connected);
   }, []);
 
   // Message Loading
   const loadMessages = useCallback(async () => {
-    if (!activeChat?.userId || !currentUser?._id) return;
+    const curId = getId(currentUser);
+    if (!activeChat?.userId || !curId) return;
 
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/messages?user1=${currentUser._id}&user2=${activeChat.userId}`,
+        `${API_BASE_URL}/api/messages?user1=${curId}&user2=${activeChat.userId}`,
         { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } }
       );
       
-      const chatId = [currentUser._id, activeChat.userId].sort().join('_');
+      const chatId = [curId, activeChat.userId].sort().join('_');
       setMessages(prev => ({
         ...prev,
         [chatId]: response.data
@@ -108,14 +102,15 @@ export const ChatProvider = ({ children, userId, currentUser }) => {
       console.error('Error loading messages:', error);
       setError('Failed to load messages');
     }
-  }, [activeChat?.userId, currentUser?._id]);
+  }, [activeChat?.userId, currentUser]);
 
   // Recent Chats
   const fetchRecentChats = useCallback(async () => {
-    if (!currentUser?._id) return;
+    const curId = getId(currentUser);
+    if (!curId) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/chats/recent?userId=${currentUser._id}`);
+      const response = await fetch(`${API_BASE_URL}/api/chats/recent?userId=${curId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch recent chats');
       }
@@ -127,7 +122,7 @@ export const ChatProvider = ({ children, userId, currentUser }) => {
     } finally {
       setLoading(false);
     }
-  }, [currentUser?._id]);
+  }, [currentUser]);
 
   // Send Message
   const sendMessage = useCallback(async (content, receiverId) => {
@@ -141,7 +136,6 @@ export const ChatProvider = ({ children, userId, currentUser }) => {
       content: content.trim(),
       timestamp: new Date().toISOString()
     };
-    console.log('[ChatContext] Sending message payload (HTTP persist + optional WS):', message);
 
     const chatId = [effectiveUserId, receiverId].sort().join('_');
 
@@ -162,25 +156,31 @@ export const ChatProvider = ({ children, userId, currentUser }) => {
         timestamp: message.timestamp
       };
 
-      setMessages(prev => ({
-        ...prev,
-        [chatId]: [...(prev[chatId] || []), optimisticMessage]
-      }));
+        console.debug('[ChatContext] appending optimistic message:', optimisticMessage, 'chatId=', chatId);
+        setMessages(prev => ({
+          ...prev,
+          [chatId]: [...(prev[chatId] || []), optimisticMessage]
+        }));
     }
 
     // Try to persist message via HTTP
     try {
-      const res = await axios.post(`${API_BASE_URL}/messages`, message, {
+      const postUrl = `${API_BASE_URL}/api/messages`;
+      console.debug('[ChatContext] POSTing message to:', postUrl);
+      const res = await axios.post(postUrl, message, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
 
       const saved = res?.data || null;
+
+      console.debug('[ChatContext] POST response saved message:', saved);
 
       // If server returned an authoritative saved message, replace optimistic one (if present)
       if (saved && optimisticId) {
         setMessages(prev => {
           const list = Array.isArray(prev[chatId]) ? [...prev[chatId]] : [];
           const idx = list.findIndex(m => m && m._id === optimisticId);
+          console.debug('[ChatContext] replacing optimistic id', optimisticId, 'idx=', idx, 'chatId=', chatId);
           if (idx !== -1) {
             list.splice(idx, 1, saved);
           } else {
@@ -213,7 +213,14 @@ export const ChatProvider = ({ children, userId, currentUser }) => {
 
       return true;
     } catch (error) {
-      console.error('Error sending message:', error);
+      // Log more details to help debugging (network / status)
+      if (error.response) {
+        console.error('Error sending message - response:', error.response.status, error.response.data);
+      } else if (error.request) {
+        console.error('Error sending message - no response received:', error.request);
+      } else {
+        console.error('Error sending message:', error.message);
+      }
       setError('Failed to send message');
 
       // remove optimistic message on failure
@@ -226,7 +233,7 @@ export const ChatProvider = ({ children, userId, currentUser }) => {
 
       return false;
     }
-  }, [isConnected, userId]);
+  }, [isConnected, effectiveUserId, messages]);
 
   // Effects
   useEffect(() => {
@@ -246,6 +253,19 @@ export const ChatProvider = ({ children, userId, currentUser }) => {
   useEffect(() => {
     loadMessages();
   }, [loadMessages]);
+
+  // Periodically refresh messages for the active chat so both sides see updates without
+  // needing to manually refresh the page. This acts as a fallback when WebSocket
+  // delivery is delayed or unavailable.
+  useEffect(() => {
+    if (!activeChat?.userId) return;
+
+    const intervalId = setInterval(() => {
+      loadMessages();
+    }, 300); 
+
+    return () => clearInterval(intervalId);
+  }, [activeChat?.userId, loadMessages]);
 
   // Context Value
   const value = {

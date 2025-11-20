@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './BookingPage.css';
 import { API_ENDPOINTS, createPostOptions } from '../utils/validation';
+import { getId } from '../utils/normalize';
 
 export default function BookingPage() {
     const location = useLocation();
@@ -40,7 +41,7 @@ export default function BookingPage() {
 
         // This is the data your Go backend is expecting
         const bookingDetails = {
-            serviceId: service.id || service._id, // Use the correct ID field
+            serviceId: getId(service) || service.id || service._id, // Use normalized ID
             startTime: new Date(startTime).toISOString(), // Ensure it's in a format Go time.Time can parse
         };
         
@@ -83,7 +84,7 @@ export default function BookingPage() {
 
             // Success!
             alert('Booking successful!');
-            const providerId = provider?.id || provider?._id;
+            const providerId = getId(provider) || provider?.id || provider?._id;
             navigate(`/provider/${providerId}` , { state: { provider, user, bookedServiceId: bookingDetails.serviceId } });
         } catch (err) {
             setError(err.message || 'An error occurred during booking.');

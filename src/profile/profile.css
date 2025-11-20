@@ -30,7 +30,7 @@
     font-weight: 700;
     font-size: 20px;
     color: #fff;
-    background: linear-gradient(135deg, var(--accent), #8b5cf6 70%);
+    background-image: var(--accent-gradient);
     box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
 }
 
@@ -87,7 +87,7 @@
 
 /* Primary button */
 .btn-primary{
-    background: var(--accent);
+    background: var(--btn-bg);
     color: white;
     border: none;
     border-radius: 8px;
@@ -101,9 +101,9 @@
 
 /* Secondary button */
 .btn-secondary{
-    background: #eef2ff;
-    color: #3730a3;
-    border: 1px solid #c7d2fe;
+    background: rgba(238,242,255,0.5);
+    color: var(--accent-color);
+    border: 1px solid rgba(167,139,250,0.28);
     border-radius: 8px;
     padding: 10px 14px;
     font-weight: 600;

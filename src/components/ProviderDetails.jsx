@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useLocation, Link, useNavigate } from 'react-router-dom';
 import { MessageSquare } from 'lucide-react';
 import { API_ENDPOINTS, createGetOptions } from '../utils/validation';
+import { getId } from '../utils/normalize';
 import './ProviderDetails.css';
 
 export default function ProviderDetails() {
@@ -21,6 +22,9 @@ export default function ProviderDetails() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [scheduleError, setScheduleError] = useState(null);
+
+    console.log("id",id);
+    console.log("intialProvider",initialProvider);
 
     // Helpers to format service fields
     const formatDuration = (duration) => {
@@ -79,29 +83,23 @@ export default function ProviderDetails() {
                 if (!res.ok) return; // silently ignore; header will remain minimal
                 const data = await res.json().catch(() => ({}));
                 const list = Array.isArray(data?.providers) ? data.providers : [];
-                const match = list.find(p => String(p.id || p._id) === String(id) || String(p.userId) === String(id));
+                const match = list.find(p => String(getId(p)) === String(id) || String(p.userId) === String(id));
                 if (mounted && match) setProvider(match);
             } catch (_) { /* ignore header fetch errors */ }
         };
 
         // Fetch services list from API
         const primeProvider = async () => {
-            console.log(" 1 ")
             if (provider && Array.isArray(provider.services) && provider.services.length > 0) {
                 setServices(provider.services);
                 return;
             }
-            console.log(" 2 ")
             setLoading(true);
             setError(null);
-            console.log(" 3 ")
             try {
-                console.log(" 4 ")
-                const providerKey = provider?.userId || id; // backend expects provider's userId
+                const providerKey = provider?.userId || provider?.uid || id; // backend expects provider's userId
                 const res = await fetch(`${API_ENDPOINTS.PROVIDERS}/${providerKey}/services`, createGetOptions(token));
-                console.log(" 5 ")
                 if (!res.ok) {
-                    console.log(" 6 ")
                     if (res.status === 404) {
                         if (mounted) setServices([]);
                         return;
@@ -122,7 +120,7 @@ export default function ProviderDetails() {
         const fetchSchedule = async () => {
             setScheduleError(null);
             try {
-                const providerKey = provider?.userId || id; // Availability uses provider's userId
+                const providerKey = provider?.userId || provider?.uid || id; // Availability uses provider's userId
                 const res = await fetch(`${API_ENDPOINTS.PROVIDERS}/${providerKey}/schedule`, createGetOptions(token));
                 if (!res.ok) {
                     if (res.status === 404) {
@@ -170,14 +168,14 @@ export default function ProviderDetails() {
                                     className="chat-button" 
                                     onClick={() => navigate('/chats', { 
                                         state: { 
-                                            user: user,
-                                            otherUser: {
-                                                _id: provider?.userId || id,
-                                                firstName: provider?.firstName,
-                                                lastName: provider?.lastName,
-                                                email: provider?.email
-                                            }
-                                        } 
+                                                            user: user,
+                                                            otherUser: {
+                                                                _id: provider.userId,
+                                                                firstName: provider?.firstName,
+                                                                lastName: provider?.lastName,
+                                                                email: provider?.email
+                                                            }
+                                                        } 
                                     })}
                                     title="Start Chat"
                                 >
@@ -203,7 +201,7 @@ export default function ProviderDetails() {
 
                     <div className="services-list">
                         {services.map(service => {
-                            const sid = String(service.id || service._id);
+                            const sid = String(getId(service) || service.id || service._id);
                             const isBooked = bookedServiceIds.has(sid) || (bookedServiceId && String(bookedServiceId) === sid);
                             const status = (serviceStatusMap.get(sid)?.status || '').toLowerCase();
                             return (
@@ -235,10 +233,7 @@ export default function ProviderDetails() {
                                                     Rebook
                                                 </Link>
                                             ) : (
-                                                <button className="book-service-btn" disabled style={{
-                                                    backgroundColor: status==='accepted' ? '#16a34a' : '#f59e0b',
-                                                    color: '#fff'
-                                                }}>
+                                                <button className={`book-service-btn status-${status}`} disabled>
                                                     {status === 'accepted' ? 'Confirmed' : 'Waiting for approval'}
                                                 </button>
                                             )

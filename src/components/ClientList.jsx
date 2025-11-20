@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './ClientList.css';
 import { API_BASE, API_ENDPOINTS, createGetOptions, buildBookingStatusUrl, createPutOptionsForStatusUpdate } from '../utils/validation';
+import { getId } from '../utils/normalize';
 
 export default function ClientList({ user }) {
     const [loading, setLoading] = useState(false);
@@ -94,7 +95,7 @@ export default function ClientList({ user }) {
 
             <div className="booking-list">
                 {pending.map(booking => {
-                    const id = booking._id || booking.id;
+                    const id = getId(booking) || booking._id || booking.id;
                     return (
                         <div key={String(id)} className="booking-card">
                             <div className="booking-header">

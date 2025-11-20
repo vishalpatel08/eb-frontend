@@ -103,8 +103,8 @@ export default function Login({ onSuccess }) {
 
                 <div className="form-group">
                     <label>Login As</label>
-                    <div style={{ display: 'flex', gap: '16px', marginTop: '8px' }}>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <div className="radio-row">
+                        <label className="radio-label">
                             <input
                                 type="radio"
                                 name="role"
@@ -114,7 +114,7 @@ export default function Login({ onSuccess }) {
                             />
                             Client
                         </label>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <label className="radio-label">
                             <input
                                 type="radio"
                                 name="role"
@@ -137,15 +137,14 @@ export default function Login({ onSuccess }) {
                     Sign in
                 </Button>
 
-                <div style={{display:'flex', alignItems:'center', gap:8, marginTop:12}}>
-                    <div style={{height:1, background:'#e5e7eb', flex:1}}></div>
-                    <div style={{color:'#6b7280', fontSize:12}}>or</div>
-                    <div style={{height:1, background:'#e5e7eb', flex:1}}></div>
+                <div className="or-row">
+                    <div className="or-line"></div>
+                    <div className="or-text">or</div>
+                    <div className="or-line"></div>
                 </div>
                 <button
                     type="button"
-                    className="btn-secondary"
-                    style={{width:'100%', marginTop:8}}
+                    className="btn-secondary full-width"
                     onClick={() => { window.location.href = `${API_ENDPOINTS.AUTH_GOOGLE_LOGIN}?role=${formData.role}`; }}
                 >
                     Continue with Google
