@@ -1,11 +1,9 @@
-/* components/chat/ChatList.css */
 .chat-list {
   flex: 0 0 320px;
   height: 100%;
   border-right: 1px solid rgba(0,0,0,0.06);
   display: flex;
   flex-direction: column;
-  /* Use Palette A for chat list background */
   background: var(--paletteA-bg);
   background-size: cover;
   color: var(--text);

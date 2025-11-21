@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MessageSquare } from 'lucide-react'; // Make sure to install lucide-react if not already
+import { MessageSquare } from 'lucide-react'; 
 import './Header.css';
 
 export default function Header({ user }) {

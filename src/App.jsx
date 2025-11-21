@@ -15,7 +15,6 @@ import OAuthCallback from './components/app/OAuthCallback';
 import { getId } from './utils/normalize';
 import React from 'react'
 
-// Protected Route wrapper
 function RequireAuth({ children }) {
   const location = useLocation();
   const stateUser = location.state?.user;
@@ -24,14 +23,11 @@ function RequireAuth({ children }) {
   if (!user) {
     return <Navigate to="/" replace />;
   }
-  // derive a stable userId to pass into protected children (covers different payload shapes)
   const derivedUserId = getId(user);
-  // Ensure we return a single React element (the protected child) with injected props
   try {
     const onlyChild = React.Children.only(children);
     return React.cloneElement(onlyChild, { currentUser: user, userId: derivedUserId });
   } catch (e) {
-    // Fallback to mapping if multiple children were provided for some reason
     return React.Children.map(children, child => 
       React.cloneElement(child, { currentUser: user, userId: derivedUserId })
     );
@@ -42,14 +38,10 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public routes */}
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Registration />} />
-        
-        {/* OAuth callback (public) */}
         <Route path="/oauth/callback" element={<OAuthCallback />} />
 
-        {/* Protected routes */}
         <Route path="/home" element={
           <RequireAuth>
             <Home />

@@ -12,7 +12,6 @@ export default function ProviderBookings() {
   const user = stateUser || storedUser;
   const token = user?.token || user?.accessToken || null;
 
-    // Removed duplicate fmt function definition
   const [error, setError] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -75,7 +74,7 @@ export default function ProviderBookings() {
         if (!mounted || !data) return;
         setProviderUserMap(prev => ({ ...prev, [id]: data }));
       } catch (e) {
-        // ignore individual failures
+        console.log(e)
       }
     }
 

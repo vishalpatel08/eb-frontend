@@ -6,7 +6,6 @@ import { API_BASE_URL } from '../config';
 
 export const ChatContext = createContext();
 
-// Add this at the bottom of ChatContext.jsx, before the final export
 export const useChat = () => {
   const context = useContext(ChatContext);
   if (context === undefined) {
@@ -16,10 +15,7 @@ export const useChat = () => {
 };
 
 export const ChatProvider = ({ children, userId, currentUser }) => {
-  // Derive an effective userId from props or currentUser
   const effectiveUserId = userId || getId(currentUser);
-
-  // State
   const [isConnected, setIsConnected] = useState(false);
   const [activeChat, setActiveChat] = useState(null);
   const [messages, setMessages] = useState({});
@@ -37,8 +33,6 @@ export const ChatProvider = ({ children, userId, currentUser }) => {
     }
   }, [effectiveUserId]);
 
-
-  // Message Handlers
   const handleMessage = useCallback((newMessage) => {
     console.debug('[ChatContext] handleMessage received:', newMessage);
     const chatId = [newMessage.senderId, newMessage.receiverId]
@@ -47,13 +41,10 @@ export const ChatProvider = ({ children, userId, currentUser }) => {
 
     setMessages(prev => {
       const list = Array.isArray(prev[chatId]) ? [...prev[chatId]] : [];
-
-      // If an identical message (by _id) already exists, ignore
       if (newMessage._id && list.some(m => m._id === newMessage._id)) {
         return prev;
       }
 
-      // Remove any existing message that matches by sender/receiver/content
       const normalizedNewContent = (newMessage.content || '').trim();
       const filtered = list.filter(m => {
         try {
@@ -61,7 +52,6 @@ export const ChatProvider = ({ children, userId, currentUser }) => {
           const sameParticipants = m.senderId === newMessage.senderId && m.receiverId === newMessage.receiverId;
           const sameContent = (m.content || '').trim() === normalizedNewContent;
           if (sameParticipants && sameContent) {
-            // drop this message (it may be optimistic or duplicate)
             return false;
           }
           return true;
@@ -139,12 +129,10 @@ export const ChatProvider = ({ children, userId, currentUser }) => {
 
     const chatId = [effectiveUserId, receiverId].sort().join('_');
 
-    // If an authoritative server message already exists with same content, skip optimistic append
     const existing = messages[chatId] || [];
     const normalizedContent = message.content.trim();
     const alreadyHasServerMessage = existing.some(m => m && m._id && !String(m._id).startsWith('local-') && (m.content || '').trim() === normalizedContent && m.senderId === message.senderId && m.receiverId === message.receiverId);
 
-    // Create optimistic message if needed
     let optimisticId = null;
     if (!alreadyHasServerMessage) {
       optimisticId = `local-${Date.now()}-${Math.floor(Math.random()*10000)}`;
@@ -163,7 +151,6 @@ export const ChatProvider = ({ children, userId, currentUser }) => {
         }));
     }
 
-    // Try to persist message via HTTP
     try {
       const postUrl = `${API_BASE_URL}/api/messages`;
       console.debug('[ChatContext] POSTing message to:', postUrl);
@@ -175,7 +162,6 @@ export const ChatProvider = ({ children, userId, currentUser }) => {
 
       console.debug('[ChatContext] POST response saved message:', saved);
 
-      // If server returned an authoritative saved message, replace optimistic one (if present)
       if (saved && optimisticId) {
         setMessages(prev => {
           const list = Array.isArray(prev[chatId]) ? [...prev[chatId]] : [];
@@ -184,7 +170,6 @@ export const ChatProvider = ({ children, userId, currentUser }) => {
           if (idx !== -1) {
             list.splice(idx, 1, saved);
           } else {
-            // ensure no duplicates by removing any message with same content/sender/receiver
             const filtered = list.filter(m => !(m && (m.senderId === saved.senderId && m.receiverId === saved.receiverId && (m.content || '').trim() === (saved.content || '').trim())));
             filtered.push(saved);
             return { ...prev, [chatId]: filtered };
@@ -193,7 +178,6 @@ export const ChatProvider = ({ children, userId, currentUser }) => {
         });
       }
 
-      // If websocket is connected, also attempt to send a realtime message
       if (isConnected) {
         try {
           const wsMsg = {
@@ -213,7 +197,6 @@ export const ChatProvider = ({ children, userId, currentUser }) => {
 
       return true;
     } catch (error) {
-      // Log more details to help debugging (network / status)
       if (error.response) {
         console.error('Error sending message - response:', error.response.status, error.response.data);
       } else if (error.request) {
@@ -223,7 +206,6 @@ export const ChatProvider = ({ children, userId, currentUser }) => {
       }
       setError('Failed to send message');
 
-      // remove optimistic message on failure
       if (optimisticId) {
         setMessages(prev => {
           const list = Array.isArray(prev[chatId]) ? prev[chatId].filter(m => !(m && m._id === optimisticId)) : [];
@@ -254,9 +236,6 @@ export const ChatProvider = ({ children, userId, currentUser }) => {
     loadMessages();
   }, [loadMessages]);
 
-  // Periodically refresh messages for the active chat so both sides see updates without
-  // needing to manually refresh the page. This acts as a fallback when WebSocket
-  // delivery is delayed or unavailable.
   useEffect(() => {
     if (!activeChat?.userId) return;
 
@@ -267,7 +246,6 @@ export const ChatProvider = ({ children, userId, currentUser }) => {
     return () => clearInterval(intervalId);
   }, [activeChat?.userId, loadMessages]);
 
-  // Context Value
   const value = {
     isConnected,
     activeChat,

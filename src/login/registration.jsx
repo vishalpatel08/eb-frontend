@@ -3,8 +3,6 @@ import { useNavigate, Link } from "react-router-dom";
 import { API_ENDPOINTS, createApiOptions } from "../utils/validation";
 import "./registration.css";
 
-/* registration.jsx */
-
 const initialState = {
     firstName: "",
     lastName: "",
@@ -27,7 +25,6 @@ export default function Registration() {
         if (!values.email.trim()) {
             errs.email = "Email is required";
         } else {
-            // basic email pattern
             const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!re.test(values.email)) errs.email = "Invalid email address";
         }
@@ -66,10 +63,7 @@ export default function Registration() {
                 throw new Error(data.message || "Registration failed");
             }
 
-            // Build user object with token so authenticated requests work
             const token = data?.token;
-            // Prefer backend user payload (which should now include an _id) but
-            // fall back to the local form values if needed
             const backendUser = data && data.user ? data.user : null;
             const userPayload = backendUser
                 ? { ...backendUser, token }
@@ -201,7 +195,6 @@ export default function Registration() {
                     type="button"
                     className="btn-secondary full-width"
                     onClick={() => {
-                        // Ensure we have a valid role before proceeding
                         const role = form.role === 'provider' ? 'provider' : 'client';
                         window.location.href = `${API_ENDPOINTS.AUTH_GOOGLE_LOGIN}?role=${encodeURIComponent(role)}`;
                     }}

@@ -1,6 +1,3 @@
-/* Styles for ProviderBookings component - moved out of JSX
-   Uses global variables from src/styles/main.css for consistency
-*/
 .provider-bookings{
   width: 80%;
   max-width: 900px;

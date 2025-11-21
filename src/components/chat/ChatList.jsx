@@ -1,4 +1,3 @@
-// components/chat/ChatList.jsx
 import React, { useEffect, useState } from 'react';
 import { useChat } from '../../contexts/ChatContext';
 import { useNavigate } from 'react-router-dom';
@@ -18,7 +17,6 @@ export const ChatList = ({ currentUser }) => {
     return () => clearInterval(interval);
   }, [fetchRecentChats]);
 
-  // If the current user is a provider, fetch minimal user info for each recent chat
   const candidateIdFromChat = (chat) => {
     if (!chat) return null;
     if (chat.userId) return chat.userId;
@@ -51,7 +49,7 @@ export const ChatList = ({ currentUser }) => {
         if (!mounted || !data) return;
         setUserMap(prev => ({ ...prev, [id]: data }));
       } catch (e) {
-        // ignore
+        console.log(e)
       }
     };
 
@@ -83,7 +81,6 @@ export const ChatList = ({ currentUser }) => {
               className="chat-list-item clickable"
               onClick={() => setActiveChat({ userId: otherId, userName: displayName })}
             >
-              {/* avatar removed to keep chat list simple */}
               <div className="chat-info">
                 <div className="chat-header">
                   <span className="chat-name clickable" onClick={(e) => { e.stopPropagation();

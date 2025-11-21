@@ -1,4 +1,3 @@
-// components/chat/ChatContainer.jsx
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ChatList } from './ChatList';
@@ -23,7 +22,6 @@ export const ChatContainer = ({ currentUser, userId }) => {
     }
   }, [location.state]);
 
-  // prefer explicit userId prop (injected by RequireAuth) but fall back to currentUser._id
   const providedUserId = userId || getId(currentUser);
 
   return (

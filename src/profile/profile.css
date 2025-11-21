@@ -1,4 +1,3 @@
-/* Profile card uses global tokens and base styles from src/styles/main.css */
 .profile-card{
     max-width: 520px;
     width: 100%;
@@ -11,14 +10,12 @@
     margin: 24px auto;
 }
 
-/* Header with avatar and title */
 .profile-header{
     display: flex;
     gap: 16px;
     align-items: center;
 }
 
-/* Circular avatar with initials */
 .avatar{
     width: 64px;
     height: 64px;
@@ -34,7 +31,6 @@
     box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
 }
 
-/* Title area */
 .title{
     display: flex;
     flex-direction: column;
@@ -48,7 +44,6 @@
     color: var(--text);
 }
 
-/* Badge indicating role */
 .role-badge{
     display: inline-block;
     margin-top: 6px;
@@ -59,7 +54,6 @@
     letter-spacing: 0.2px;
 }
 
-/* Role color variants */
 .role-badge.client{
     background: var(--client-bg);
     color: var(--client-color);
@@ -70,7 +64,6 @@
     color: var(--provider-color);
 }
 
-/* Body with rows */
 .profile-body{
     margin-top: 18px;
     display: flex;
@@ -78,14 +71,12 @@
     gap: 10px;
 }
 
-/* Action button area */
 .profile-actions{
     margin-top: 20px;
     display: flex;
     justify-content: flex-end;
 }
 
-/* Primary button */
 .btn-primary{
     background: var(--btn-bg);
     color: white;
@@ -99,7 +90,6 @@
 .btn-primary:hover{ opacity: 0.95; }
 .btn-primary:active{ transform: translateY(1px); }
 
-/* Secondary button */
 .btn-secondary{
     background: rgba(238,242,255,0.5);
     color: var(--accent-color);
@@ -113,7 +103,6 @@
 .btn-secondary:hover{ opacity: 0.95; border-color: #a5b4fc; }
 .btn-secondary:active{ transform: translateY(1px); }
 
-/* Each row: label on left, value on right */
 .row{
     display: flex;
     justify-content: space-between;
@@ -127,7 +116,6 @@
     background: rgba(15, 23, 42, 0.02);
 }
 
-/* Label (muted) and value (strong) */
 .label{
     color: var(--muted);
     font-size: 13px;
@@ -140,7 +128,6 @@
     text-align: right;
 }
 
-/* Responsive adjustments */
 @media (max-width: 420px){
     .profile-card{
         padding: 16px;

@@ -1,4 +1,3 @@
-// In a new file, e.g., /components/BookingPage.js
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './BookingPage.css';
@@ -24,7 +23,6 @@ export default function BookingPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // Handle case where user lands here directly
     if (!service) {
         return <div>No service selected. Please <a href="/">go back</a> and select a service.</div>;
     }
@@ -39,10 +37,10 @@ export default function BookingPage() {
         setLoading(true);
         setError(null);
 
-        // This is the data your Go backend is expecting
+        // This is the data Go backend is expecting
         const bookingDetails = {
-            serviceId: getId(service) || service.id || service._id, // Use normalized ID
-            startTime: new Date(startTime).toISOString(), // Ensure it's in a format Go time.Time can parse
+            serviceId: getId(service) || service.id || service._id,
+            startTime: new Date(startTime).toISOString(),
         };
         
         const BOOKING_URL = API_ENDPOINTS.BOOKING;
@@ -55,10 +53,8 @@ export default function BookingPage() {
                 try {
                     const stored = JSON.parse(localStorage.getItem('user') || 'null');
                     if (!effectiveUser && stored) {
-                        // No user from navigation -> use stored user
                         effectiveUser = stored;
                     } else if (effectiveUser && !effectiveUser.token && !effectiveUser.accessToken && stored) {
-                        // Navigation user present but without token -> merge token from storage
                         effectiveUser = { ...effectiveUser, token: stored.token || stored.accessToken };
                     }
                 } catch {
@@ -69,12 +65,9 @@ export default function BookingPage() {
             const token = effectiveUser?.token || effectiveUser?.accessToken || null;
 
             if (!token) {
-                // No token at all: send user back to login
                 navigate('/', { replace: true });
                 return;
             }
-
-            // You'll need a createPostOptions utility function for POST requests
             const res = await fetch(BOOKING_URL, createPostOptions(bookingDetails, token)); 
 
             if (!res.ok) {
@@ -82,7 +75,6 @@ export default function BookingPage() {
                 throw new Error(errBody.message || `Booking failed (${res.status})`);
             }
 
-            // Success!
             alert('Booking successful!');
             const providerId = getId(provider) || provider?.id || provider?._id;
             navigate(`/provider/${providerId}` , { state: { provider, user, bookedServiceId: bookingDetails.serviceId } });
@@ -93,10 +85,9 @@ export default function BookingPage() {
         }
     };
 
-    // Regarding "withdrawal": 
-    // This is the "cancel" or "back" action before the booking is confirmed.
+    // cancel action before the booking is confirmed.
     const handleWithdrawal = () => {
-        navigate(-1); // Go back to the previous page
+        navigate(-1);
     };
 
     return (

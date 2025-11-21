@@ -10,5 +10,3 @@ export const WS_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.en
     const host = (typeof window !== 'undefined' && window.location && window.location.hostname) ? window.location.hostname : 'localhost';
     return `${proto}//${host}:4000`;
   })();
-
-// Single place to change host when deploying (Vite supports VITE_API_BASE_URL / VITE_WS_URL env vars)

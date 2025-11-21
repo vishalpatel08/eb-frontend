@@ -71,7 +71,7 @@
 }
 
 .booking-status.confirmed {
-    background: rgba(255,107,53,0.08); /* subtle warm tone */
+    background: rgba(255,107,53,0.08); 
     color: var(--paletteB-primary);
 }
 

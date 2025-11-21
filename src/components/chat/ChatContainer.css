@@ -1,15 +1,12 @@
-/* components/chat/ChatContainer.css */
 .chat-container {
   display: flex;
   gap: 12px;
-  /* Make the chat area fill most of the viewport vertically */
   min-height: calc(100vh - 80px);
   max-width: 1200px;
   margin: 24px auto;
   background: transparent;
 }
 
-/* On small screens stack list above window */
 @media (max-width: 880px) {
   .chat-container{ flex-direction: column; min-height: auto; margin: 12px; }
 }

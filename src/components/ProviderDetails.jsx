@@ -9,7 +9,6 @@ export default function ProviderDetails() {
     const { id } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
-    // Try to get provider from navigation state, else fetch by id
     const initialProvider = location.state?.provider || null;
     const stateUser = location.state?.user || null;
     const user = stateUser || (typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || 'null') : null);
@@ -26,9 +25,7 @@ export default function ProviderDetails() {
     console.log("id",id);
     console.log("intialProvider",initialProvider);
 
-    // Helpers to format service fields
     const formatDuration = (duration) => {
-        // assume duration is minutes; if divisible by 60 show hours
         if (duration == null) return '—';
         const d = Number(duration);
         if (Number.isNaN(d)) return String(duration);
@@ -58,7 +55,6 @@ export default function ProviderDetails() {
                 const bookings = Array.isArray(data?.bookings) ? data.bookings : [];
                 const ids = new Set();
                 const statusMap = new Map();
-                // Pick latest by startTime per service for current status view
                 bookings.forEach(b => {
                     const sid = String(b.serviceId || b.serviceID || b.service_id || '');
                     if (!sid) return;
@@ -75,20 +71,18 @@ export default function ProviderDetails() {
             } catch (_) { /* ignore */ }
         };
 
-        // If provider is absent (e.g., after refresh), fetch providers list and find the matching one.
         const ensureProviderHeader = async () => {
             if (provider) return;
             try {
                 const res = await fetch(`${API_ENDPOINTS.PROVIDERS}`, createGetOptions(token));
-                if (!res.ok) return; // silently ignore; header will remain minimal
+                if (!res.ok) return; 
                 const data = await res.json().catch(() => ({}));
                 const list = Array.isArray(data?.providers) ? data.providers : [];
                 const match = list.find(p => String(getId(p)) === String(id) || String(p.userId) === String(id));
                 if (mounted && match) setProvider(match);
-            } catch (_) { /* ignore header fetch errors */ }
+            } catch (_) { }
         };
 
-        // Fetch services list from API
         const primeProvider = async () => {
             if (provider && Array.isArray(provider.services) && provider.services.length > 0) {
                 setServices(provider.services);
@@ -120,11 +114,10 @@ export default function ProviderDetails() {
         const fetchSchedule = async () => {
             setScheduleError(null);
             try {
-                const providerKey = provider?.userId || provider?.uid || id; // Availability uses provider's userId
+                const providerKey = provider?.userId || provider?.uid || id;
                 const res = await fetch(`${API_ENDPOINTS.PROVIDERS}/${providerKey}/schedule`, createGetOptions(token));
                 if (!res.ok) {
                     if (res.status === 404) {
-                        // No schedule yet: treat as all closed without raising error
                         if (mounted) setSchedule({ week: {} });
                         return;
                     }
@@ -149,7 +142,6 @@ export default function ProviderDetails() {
     return (
         <div className="provider-page">
             <header className="provider-header">
-                {/* ... (header content remains the same) ... */}
                 <div className="provider-header-content">
                     <div className="provider-avatar-large">
                         {provider?.firstName?.[0]}{provider?.lastName?.[0]}
@@ -192,7 +184,6 @@ export default function ProviderDetails() {
                     <div className="section-header">
                         <h2>Available Services</h2>
                         <div className="section-actions">
-                            {/* Add any actions/filters here */}
                         </div>
                     </div>
 
@@ -259,7 +250,6 @@ export default function ProviderDetails() {
                 </main>
 
                 <aside className="provider-info-section">
-                    {/* ... (aside content remains the same) ... */}
                     {provider ? (
                         <div className="provider-info-card">
                             <div className="info-section">

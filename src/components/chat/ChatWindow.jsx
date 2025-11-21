@@ -1,4 +1,3 @@
-// components/chat/ChatWindow.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import { useChat } from '../../contexts/ChatContext';
 import { getId } from '../../utils/normalize';
@@ -22,7 +21,6 @@ export const ChatWindow = ({ currentUser, initialChat }) => {
   const messagesEndRef = useRef(null);
   const [isSending, setIsSending] = useState(false);
 
-  // Set initial chat if provided
   useEffect(() => {
     if (initialChat && !activeChat) {
       setActiveChat(initialChat);
@@ -33,7 +31,6 @@ export const ChatWindow = ({ currentUser, initialChat }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // When switching to a different chat, scroll to the bottom once
   useEffect(() => {
     if (activeChat) {
       scrollToBottom();
@@ -50,7 +47,6 @@ export const ChatWindow = ({ currentUser, initialChat }) => {
     }
   };
 
-  // Fetch partner profile if we don't have a name yet
   useEffect(() => {
     let mounted = true;
     const fetchPartner = async () => {
@@ -62,7 +58,6 @@ export const ChatWindow = ({ currentUser, initialChat }) => {
         if (!res.ok) return;
         const data = await res.json().catch(() => null);
         if (!mounted || !data) return;
-        // Preserve existing activeChat fields and attach name + user object
         setActiveChat(prev => ({ ...(prev || {}), userName: `${data.firstName || ''} ${data.lastName || ''}`.trim(), user: data }));
       } catch (e) {
         // ignore
@@ -75,7 +70,6 @@ export const ChatWindow = ({ currentUser, initialChat }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const msg = message.trim();
-    // Allow sending even when WebSocket is disconnected; HTTP fallback will persist messages.
     if (!msg || !activeChat || isSending) return;
     console.debug('[ChatWindow] submit: isConnected=', isConnected, 'activeChat=', activeChat?.userId);
     try {
@@ -85,10 +79,8 @@ export const ChatWindow = ({ currentUser, initialChat }) => {
       console.debug('[ChatWindow] sendMessage returned:', ok);
       if (ok) {
         setMessage('');
-        // After the current user sends a message, scroll to bottom once
         scrollToBottom();
       } else {
-        // keep the message in the input so user can retry; surface a console note
         console.warn('[ChatWindow] message not saved (sendMessage returned false)');
       }
     } catch (error) {
@@ -178,7 +170,6 @@ export const ChatWindow = ({ currentUser, initialChat }) => {
 
             return (
               <React.Fragment key={msg._id || index}>
-                {/* avatar per-message removed to keep chat simple */}
                 <div 
                   className={`message-wrapper ${isCurrentUser ? 'sent' : 'received'}`}
                 >

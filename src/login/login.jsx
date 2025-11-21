@@ -43,12 +43,9 @@ export default function Login({ onSuccess }) {
                 throw new Error((data && data.message) || `Login failed (${res.status})`);
             }
 
-            // Handle success
             if (onSuccess) {
                 onSuccess(data);
             }
-            // Be flexible with payload shape: some APIs return the user directly,
-            // others wrap it as { user }
             const userPayload = (data && (data.user || data)) || { email: formData.email };
             const userWithToken = { ...userPayload, token: data?.token || userPayload?.token };
             try {

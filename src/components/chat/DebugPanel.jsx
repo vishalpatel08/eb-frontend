@@ -27,7 +27,6 @@ export const DebugPanel = () => {
         const data = JSON.parse(text);
         setOnlineUsers(data);
       } catch (e) {
-        // Response was not JSON (likely HTML). Show raw text for debugging.
         setOnlineUsers({ error: 'Non-JSON response', body: text, status: res.status, contentType: res.headers.get('content-type') });
       }
     } catch (e) {

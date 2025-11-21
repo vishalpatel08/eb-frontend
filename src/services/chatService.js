@@ -14,18 +14,13 @@ class ChatService {
       this.disconnect();
     }
 
-    // Determine WebSocket base URL from centralized config
     try {
-      // lazy import so module stays usable in non-browser test environments
-      // prefer explicit Vite env or provided config
-      // eslint-disable-next-line global-require
       const { WS_BASE_URL } = require('../config');
       const base = WS_BASE_URL;
       const normalizedBase = base.endsWith('/') ? base.slice(0, -1) : base;
       const wsUrl = `${normalizedBase}/ws?userId=${userId}`;
       this.socket = new WebSocket(wsUrl);
     } catch (err) {
-      // fallback (shouldn't normally happen in browser)
       const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const defaultBackendHost = window.location.hostname + ':4000';
       const base = `${wsProtocol}//${defaultBackendHost}`;
@@ -48,8 +43,6 @@ class ChatService {
 
     this.socket.onmessage = (event) => {
       try {
-        // Server may send multiple JSON objects in one websocket frame (each encoder.Encode adds a newline).
-        // Handle newline-delimited JSON (NDJSON) by splitting on newlines and parsing each non-empty line.
         const text = event.data;
         const lines = String(text).split(/\r?\n/).filter(Boolean);
         lines.forEach(line => {
@@ -74,7 +67,6 @@ class ChatService {
       this.connectionHandlers.forEach(handler => handler(false));
       this.socket = null;
 
-      // Attempt reconnect unless explicitly closed cleanly (1000)
       if (!event.wasClean && this.reconnectAttempts < this.maxReconnectAttempts) {
         this.reconnectAttempts += 1;
         const delay = this.reconnectDelayMs * this.reconnectAttempts;
@@ -88,7 +80,6 @@ class ChatService {
     this.socket.onerror = (error) => {
       try {
         console.error('WebSocket error event:', error);
-        // Some browsers pass an Event object, inspect readyState
         if (this.socket) {
           console.debug('socket.readyState=', this.socket.readyState);
         }
@@ -135,7 +126,6 @@ class ChatService {
     return () => this.connectionHandlers.delete(handler);
   }
 
-  // debug getters
   getReadyState() {
     return this.socket ? this.socket.readyState : WebSocket.CLOSED;
   }

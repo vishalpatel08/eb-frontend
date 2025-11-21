@@ -46,7 +46,6 @@ export default function ProviderList({ user }) {
                     <div 
                         key={getId(provider) || provider.id} 
                         className="provider-card clickable" 
-                        // This is the parent click handler
                         onClick={() => navigate(`/provider/${getId(provider) || provider.id}`, { state: { provider, user } })}
                     >
                         <div className="provider-avatar">
@@ -58,20 +57,15 @@ export default function ProviderList({ user }) {
                             <div className="provider-rating">★ {provider.rating ?? '—'}</div>
                         </div>
 
-                        {/* --- MODIFICATION HERE --- */}
                         <button 
                             className="book-button" 
                             onClick={e => { 
-                                // 1. Stop the click from bubbling up to the parent card's onClick
                                 e.stopPropagation(); 
-                                
-                                // 2. Perform the same navigation as the parent card
                                 navigate(`/provider/${getId(provider) || provider.id}`, { state: { provider, user } });
                             }}
                         >
                             Book Now
                         </button>
-                        {/* --- END MODIFICATION --- */}
                     </div>
                 ))}
                 {!loading && !error && providers.length === 0 && (
