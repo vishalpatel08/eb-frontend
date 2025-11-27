@@ -142,7 +142,7 @@ export default function Login({ onSuccess }) {
                 <button
                     type="button"
                     className="btn-secondary full-width"
-                    onClick={() => { window.location.href = `${API_ENDPOINTS.AUTH_GOOGLE_LOGIN}?role=${formData.role}`; }}
+                    onClick={() => { window.location.href = API_ENDPOINTS.AUTH_GOOGLE_LOGIN}}
                 >
                     Continue with Google
                 </button>
